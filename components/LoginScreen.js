@@ -57,7 +57,7 @@ export default function LoginScreen() {
             <Card className="w-full max-w-md bg-slate-800 border-slate-700 text-white">
                 <CardHeader className="text-center">
                     <CardTitle className="text-4xl font-black uppercase tracking-widest">Moboflix</CardTitle>
-                    <CardDescription className="text-slate-400">Welcome to Premium At-Home Repair</CardDescription>
+                    <CardDescription className="text-slate-400">Welcome to Premium At-Home Phone Repair</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="grid grid-cols-2 gap-2 bg-slate-900 p-1 rounded-md">
@@ -88,8 +88,7 @@ export default function LoginScreen() {
             </Card>
              <div className="text-center py-4 mt-4">
                 <p className="text-sm text-slate-500">
-                    App built by <a href="https://github.com/RachitSE" target="_blank" rel="noopener noreferrer" className="font-semibold text-slate-400 hover:text-white underline">Rachit</a> and Mridul
-                </p>
+                             </p>
             </div>
         </div>
     );

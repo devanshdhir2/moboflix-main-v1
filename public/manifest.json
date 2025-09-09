@@ -1,6 +1,6 @@
 {
-    "name": "Mobofix",
-    "short_name": "Mobofix",
+    "name": "Moboflix",
+    "short_name": "Moboflix",
     "description": "Premium At-Home Repair Service",
     "start_url": "/",
     "display": "standalone",

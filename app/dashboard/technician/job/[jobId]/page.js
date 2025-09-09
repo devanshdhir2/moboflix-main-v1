@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ChatComponent from '../../../../../components/ChatComponent';
+import { AlertCircle, MessageSquare } from 'lucide-react';
 
 const CountdownTimer = ({ appointmentDate }) => {
     const [timeLeft, setTimeLeft] = useState('');
@@ -49,7 +50,7 @@ const DetailRow = ({ label, value, icon, isLink = false }) => (
     </div>
 );
 
-export default function JobDetailPage() {
+export default function TechnicianJobDetailPage() {
     const { user } = useAuth();
     const router = useRouter();
     const params = useParams();
@@ -58,8 +59,7 @@ export default function JobDetailPage() {
     const [job, setJob] = useState(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
-    
-    // Fetches job details
+
     useEffect(() => {
         if (!user || !jobId) return;
         const ticketRef = doc(db, 'tickets', jobId);
@@ -68,14 +68,14 @@ export default function JobDetailPage() {
                 if (doc.exists()) {
                     setJob({ id: doc.id, ...doc.data() });
                 } else {
-                    alert("Job not found.");
+                    alert("Ticket not found.");
                     router.push('/dashboard/technician');
                 }
                 setLoading(false);
-            },
+            }, 
             (error) => {
-                console.error("Error fetching job details:", error);
-                alert("Could not load job. You may not have permission.");
+                console.error("Error fetching ticket:", error);
+                alert("Could not fetch ticket details. You may not have permission.");
                 setLoading(false);
                 router.push('/dashboard/technician');
             }
@@ -83,10 +83,8 @@ export default function JobDetailPage() {
         return () => unsubscribe();
     }, [user, jobId, router]);
 
-    // --- UPDATED: Manages live location sharing every 30 seconds ---
     useEffect(() => {
         let intervalId = null;
-
         const updateLocation = () => {
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
@@ -94,37 +92,22 @@ export default function JobDetailPage() {
                         const { latitude, longitude } = position.coords;
                         const ticketRef = doc(db, 'tickets', jobId);
                         updateDoc(ticketRef, {
-                            technicianLocation: {
-                                lat: latitude,
-                                lng: longitude,
-                                timestamp: new Date()
-                            }
+                            technicianLocation: { lat: latitude, lng: longitude, timestamp: new Date() }
                         });
-                        console.log(`[Location Update] Position sent at ${new Date().toLocaleTimeString()}`);
                     },
-                    (error) => {
-                        console.error("Geolocation Error:", error.message);
-                        // Don't alert here to avoid spamming the technician
-                    },
+                    (error) => { console.error("Geolocation Error:", error.message); },
                     { enableHighAccuracy: true }
                 );
             }
         };
-
-        // Start sharing location only when the job status is 'In Progress'
         if (job && job.status === 'In Progress') {
-            updateLocation(); // Send location once immediately
-            intervalId = setInterval(updateLocation, 30000); // And then every 30 seconds
+            updateLocation();
+            intervalId = setInterval(updateLocation, 30000);
         }
-
-        // Cleanup: Stop the interval when the component unmounts or the job status changes
         return () => {
-            if (intervalId) {
-                clearInterval(intervalId);
-                console.log("[Location Update] Stopped sharing location.");
-            }
+            if (intervalId) clearInterval(intervalId);
         };
-    }, [job, jobId]); // Reruns when job status changes
+    }, [job, jobId]);
 
     const handleNavigate = (address) => {
         const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
@@ -133,7 +116,6 @@ export default function JobDetailPage() {
 
     const handleAcceptJob = () => {
         if (!confirm("Are you sure you want to accept this job? This will start sharing your live location with the customer.")) return;
-        
         setActionLoading(true);
         const ticketRef = doc(db, 'tickets', jobId);
         updateDoc(ticketRef, { 
@@ -146,16 +128,55 @@ export default function JobDetailPage() {
         .finally(() => setActionLoading(false));
     };
 
+    const handleWhatsAppContact = () => {
+        if (!job?.contactNumber) {
+            alert("Contact number not found for this user.");
+            return;
+        }
+        const whatsappUrl = `https://wa.me/91${job.contactNumber}`;
+        window.open(whatsappUrl, '_blank');
+    };
+
     const renderActionButton = () => {
         if (!job) return null;
 
+        const isProductOrder = job.type === 'product';
+
+        if (job.isGuestTicket) {
+            const actionText = isProductOrder ? 'delivery' : 'repair';
+            if (job.status === 'In Progress') {
+                return (
+                    <div className="space-y-4">
+                        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md">
+                            <p className="font-bold">Guest User - Awaiting Start</p>
+                            <p className="text-sm">The user may be offline. Contact them on WhatsApp to coordinate. The owner can manually start the {actionText} if needed.</p>
+                        </div>
+                        <Button onClick={handleWhatsAppContact} className="w-full bg-green-500 hover:bg-green-600 flex items-center gap-2"><MessageSquare className="h-5 w-5" /> Contact on WhatsApp</Button>
+                        <Button onClick={() => handleNavigate(job.address)} className="w-full bg-purple-600 hover:bg-purple-700">Navigate to Address</Button>
+                    </div>
+                );
+            }
+            if (job.status === 'Work Started') {
+                 return (
+                    <div className="space-y-4">
+                        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md">
+                            <p className="font-bold">Guest {isProductOrder ? 'Delivery' : 'Repair'} In Progress</p>
+                            <p className="text-sm">Work has been started. You may now proceed.</p>
+                        </div>
+                        <Button onClick={handleWhatsAppContact} className="w-full bg-green-500 hover:bg-green-600 flex items-center gap-2"><MessageSquare className="h-5 w-5" /> Contact on WhatsApp</Button>
+                        <Link href={`/dashboard/technician/payment/${job.id}`} passHref><Button className="w-full">Proceed to Payment</Button></Link>
+                    </div>
+                );
+            }
+        }
+        
         if (job.status === 'Pending') {
             return <Button onClick={handleAcceptJob} disabled={actionLoading} className="w-full bg-green-600 hover:bg-green-700">Accept This Job</Button>;
         }
         if (job.status === 'In Progress') {
             return (
                 <div className="text-center space-y-4">
-                    <p className="text-slate-600 font-semibold animate-pulse">Sharing location... Waiting for customer confirmation.</p>
+                    <p className="text-slate-600 font-semibold animate-pulse">Waiting for customer to confirm start...</p>
                     <Button onClick={() => handleNavigate(job.address)} className="w-full bg-purple-600 hover:bg-purple-700">Navigate to Address</Button>
                 </div>
             );
@@ -177,7 +198,6 @@ export default function JobDetailPage() {
     if (!job) return <div className="p-8 text-center">Job data could not be loaded.</div>;
 
     const appointmentDateTime = job.appointmentDate?.toDate ? job.appointmentDate.toDate() : new Date(job.appointmentDate);
-    
     const chatEnabledStatuses = ['In Progress', 'Work Started', 'Pending Payment', 'Completed'];
 
     return (
@@ -192,12 +212,14 @@ export default function JobDetailPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 border-t pt-6">
                         <DetailRow label="Time Slot" value={appointmentDateTime.toLocaleString()} icon="🕒" />
                         <DetailRow label="Address" value={job.address} icon="📍" />
-                        <DetailRow label="Customer Email" value={job.customerEmail} icon="✉️" />
+                        <DetailRow label="Customer" value={job.customerEmail} icon="✉️" />
                         {job.contactNumber && <DetailRow label="Contact Number" value={`tel:${job.contactNumber}`} icon="📞" isLink={true} />}
                     </div>
                 </CardContent>
                 <CardFooter className="bg-slate-50 p-6">
-                    {actionLoading ? <div className="flex justify-center w-full"><Spinner/></div> : renderActionButton()}
+                    <div className="w-full space-y-3">
+                        {actionLoading ? <Spinner/> : renderActionButton()}
+                    </div>
                 </CardFooter>
             </Card>
 

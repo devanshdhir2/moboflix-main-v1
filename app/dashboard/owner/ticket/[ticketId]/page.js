@@ -4,10 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../../../context/AuthContext';
 import { db } from '../../../../../firebase/config';
 import { doc, onSnapshot, updateDoc, getDocs, collection, query, where } from 'firebase/firestore';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Spinner from '../../../../../components/Spinner';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { CheckCircle } from 'lucide-react';
 
 const DetailRow = ({ label, value }) => (
     <div>
@@ -26,9 +27,10 @@ const TechnicianSelectItem = ({ item, onSelect }) => (
     </div>
 );
 
-export default function OwnerTicketDetailPage({ params }) {
+export default function OwnerTicketDetailPage() {
     const { user } = useAuth();
     const router = useRouter();
+    const params = useParams();
     const { ticketId } = params;
 
     const [ticket, setTicket] = useState(null);
@@ -48,6 +50,9 @@ export default function OwnerTicketDetailPage({ params }) {
                 router.push('/dashboard/owner');
             }
             setLoading(false);
+        }, (error) => {
+            console.error("Error fetching ticket for owner:", error);
+            setLoading(false);
         });
         return () => unsubscribe();
     }, [user, ticketId, router]);
@@ -64,34 +69,35 @@ export default function OwnerTicketDetailPage({ params }) {
         }
     }, [isModalVisible]);
 
+    const updateTicketStatus = async (newStatus, extraData = {}) => {
+        setActionLoading(true);
+        const ticketRef = doc(db, 'tickets', ticket.id);
+        try {
+            await updateDoc(ticketRef, { status: newStatus, ...extraData });
+            alert(`Status successfully updated to "${newStatus}"!`);
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     const handleReassign = async (newTechnician) => {
         setModalVisible(false);
-        setActionLoading(true);
-        const ticketRef = doc(db, 'tickets', ticket.id);
-        try {
-            await updateDoc(ticketRef, {
-                technicianId: newTechnician.id,
-                technicianName: newTechnician.displayName || newTechnician.email,
-            });
-            alert("Success! Ticket has been reassigned.");
-        } catch (error) {
-            alert(`Error: ${error.message}`);
-        } finally {
-            setActionLoading(false);
-        }
-      };
+        updateTicketStatus('Pending', {
+            technicianId: newTechnician.id,
+            technicianName: newTechnician.displayName || newTechnician.email,
+        });
+    };
 
-    const handleApprovePayment = async () => {
-        setActionLoading(true);
-        const ticketRef = doc(db, 'tickets', ticket.id);
-        try {
-            await updateDoc(ticketRef, { status: 'Completed' });
-            alert("Payment Approved. The ticket is now completed.");
-        } catch (error) {
-            alert(`Error: ${error.message}`);
-        } finally {
-            setActionLoading(false);
-        }
+    const handleApprovePayment = () => {
+        updateTicketStatus('Completed');
+    };
+
+    const handleManualStart = () => {
+        const actionText = ticket.type === 'product' ? 'delivery' : 'repair';
+        if (!confirm(`Are you sure you want to manually start this ${actionText} for the guest?`)) return;
+        updateTicketStatus('Work Started');
     };
 
     if (loading) return <Spinner />;
@@ -110,7 +116,6 @@ export default function OwnerTicketDetailPage({ params }) {
                         <CardHeader><CardTitle>Ticket Details</CardTitle></CardHeader>
                         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <DetailRow label="Customer" value={ticket.customerEmail} />
-                            {/* --- NEW FIELD --- */}
                             <DetailRow label="Contact" value={ticket.contactNumber || 'Not Provided'} />
                             <DetailRow label="Technician" value={ticket.technicianName} />
                             <DetailRow label="Status" value={ticket.status} />
@@ -119,6 +124,12 @@ export default function OwnerTicketDetailPage({ params }) {
                             {ticket.finalAmount && <DetailRow label="Final Amount" value={`₹${ticket.finalAmount}`} />}
                         </CardContent>
                     </Card>
+                    {ticket.isGuestTicket && (
+                         <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md">
+                            <p className="font-bold">This is a Guest Ticket</p>
+                            <p className="text-sm">The customer created this request without signing up.</p>
+                        </div>
+                    )}
                     <Card>
                         <CardHeader><CardTitle>Customer Review</CardTitle></CardHeader>
                         <CardContent>
@@ -139,9 +150,22 @@ export default function OwnerTicketDetailPage({ params }) {
                 <div className="lg:col-span-1">
                     <Card>
                          <CardHeader><CardTitle>Admin Actions</CardTitle></CardHeader>
-                         <CardContent>
+                         <CardContent className="space-y-4">
                          {actionLoading ? <Spinner/> : (
                              <div className="space-y-4">
+                                {/* --- UPDATED: Logic now handles both product and repair guest tickets --- */}
+                                {ticket.isGuestTicket && ticket.status === 'In Progress' && (
+                                     <div className="space-y-4">
+                                        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md">
+                                            <p className="font-bold">Guest Action Required</p>
+                                            <p className="text-sm">The guest customer is offline. You can override and start it manually.</p>
+                                        </div>
+                                         <Button onClick={handleManualStart} className="w-full bg-indigo-600 hover:bg-indigo-700 flex items-center gap-2">
+                                             <CheckCircle className="h-5 w-5"/>
+                                             {`Manually Start ${ticket.type === 'product' ? 'Delivery' : 'Repair'}`}
+                                         </Button>
+                                    </div>
+                                )}
                                 {ticket.status === 'Pending Payment' && (
                                      <Button onClick={handleApprovePayment} className="w-full bg-green-600 hover:bg-green-700">Approve Payment (₹{ticket.finalAmount})</Button>
                                 )}

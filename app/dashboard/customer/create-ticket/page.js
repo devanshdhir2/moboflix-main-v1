@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
-import { db, FieldValue } from '../../../../firebase/config';
+import { db } from '../../../../firebase/config';
 import { collection, addDoc, getDocs, query, where, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Spinner from '../../../../components/Spinner';
@@ -42,7 +42,7 @@ export default function CreateTicketPage() {
     const [deviceInfo, setDeviceInfo] = useState('');
     const [issueDescription, setIssueDescription] = useState('');
     const [address, setAddress] = useState('');
-    const [contactNumber, setContactNumber] = useState(''); // <-- NEW STATE
+    const [contactNumber, setContactNumber] = useState('');
     const [isFetchingLocation, setIsFetchingLocation] = useState(false);
     const [loading, setLoading] = useState(false);
     
@@ -110,7 +110,6 @@ export default function CreateTicketPage() {
 
     const handleCreateTicket = async (e) => {
         e.preventDefault();
-        // UPDATED VALIDATION
         if (!deviceInfo || !issueDescription || !address || !contactNumber || !selectedTechnician) {
             alert('Incomplete Form: Please fill out all fields, including contact number, and select a technician.');
             return;
@@ -124,8 +123,10 @@ export default function CreateTicketPage() {
             if (user) {
                 await addDoc(collection(db, "tickets"), {
                     customerId: user.uid,
-                    customerEmail: user.email,
-                    contactNumber: contactNumber, // <-- SAVE TO DATABASE
+                    // --- UPDATED: Store guest status and a clearer name ---
+                    customerEmail: user.isAnonymous ? "Guest User" : user.email,
+                    isGuestTicket: user.isAnonymous, // The crucial flag
+                    contactNumber: contactNumber,
                     technicianId: selectedTechnician.id,
                     technicianName: selectedTechnician.displayName || selectedTechnician.email,
                     deviceInfo,
@@ -166,12 +167,10 @@ export default function CreateTicketPage() {
                         {isFetchingLocation ? 'Fetching...' : 'Use My Current Location'}
                     </button>
                 </div>
-                {/* --- NEW FIELD --- */}
                 <div>
-                    <label className="text-lg font-semibold text-gray-700">4. Contact Number</label>
+                    <label className="text-lg font-semibold text-gray-700">4. Contact Number (for WhatsApp)</label>
                     <input type="tel" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} placeholder="e.g., 9876543210" className="w-full mt-2 p-4 border border-gray-300 rounded-lg" required />
                 </div>
-                {/* --- --- --- --- --- */}
                 <div>
                     <label className="text-lg font-semibold text-gray-700">5. Preferred Date & Time</label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">

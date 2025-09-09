@@ -38,6 +38,7 @@ export default function ProductOrderPage() {
 
     // Form State
     const [address, setAddress] = useState('');
+    const [contactNumber, setContactNumber] = useState(''); // --- NEW: Contact number state
     const [appointmentDate, setAppointmentDate] = useState('');
     const [selectedTech, setSelectedTech] = useState(null);
 
@@ -46,7 +47,6 @@ export default function ProductOrderPage() {
         if (!productId) return;
 
         const fetchProductAndTechnicians = async () => {
-            // Fetch product
             const productRef = doc(db, 'products', productId);
             const productSnap = await getDoc(productRef);
             if (productSnap.exists()) {
@@ -56,7 +56,6 @@ export default function ProductOrderPage() {
                 router.push('/dashboard/customer/store');
             }
 
-            // Fetch technicians
             const techQuery = query(collection(db, "users"), where("role", "==", "technician"));
             const techSnapshot = await getDocs(techQuery);
             const fetchedTechnicians = techSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -70,35 +69,37 @@ export default function ProductOrderPage() {
 
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
-        if (!address || !appointmentDate || !selectedTech) {
-            alert("Please provide an address, select a date, and choose a technician.");
+        // --- UPDATED: Added contactNumber to validation
+        if (!address || !appointmentDate || !selectedTech || !contactNumber) {
+            alert("Please provide an address, contact number, select a date, and choose a technician.");
             return;
         }
         setIsSubmitting(true);
 
         try {
-            await addDoc(collection(db, 'tickets'), {
-                // Customer Info
+            const ticketData = {
                 customerId: user.uid,
-                customerEmail: user.email || 'Anonymous',
+                customerEmail: user.email || 'Anonymous Guest',
                 address,
+                contactNumber, // --- NEW: Save contact number
                 appointmentDate: new Date(appointmentDate),
-                
-                // Product Info
                 productId: product.id,
-                deviceInfo: `Order: ${product.name}`, // For display on dashboard
+                deviceInfo: `Order: ${product.name}`,
                 issueDescription: `Deliver and install ${product.name} for ${product.model}.`,
                 finalAmount: product.price,
-
-                // Technician Info
                 technicianId: selectedTech.id,
                 technicianName: selectedTech.displayName || selectedTech.email,
-
-                // Ticket Metadata
                 status: 'Pending',
-                type: 'product', // CRUCIAL: Differentiates this from a repair
+                type: 'product',
                 createdAt: serverTimestamp(),
-            });
+            };
+            
+            // --- NEW: Check if the user is a guest and flag the ticket ---
+            if (user.isAnonymous) {
+                ticketData.isGuestTicket = true;
+            }
+
+            await addDoc(collection(db, 'tickets'), ticketData);
             alert("Order placed successfully!");
             router.push('/dashboard/customer');
 
@@ -131,13 +132,17 @@ export default function ProductOrderPage() {
                     </div>
                     
                     <form onSubmit={handlePlaceOrder} className="space-y-6">
-                        {/* Step 1: Delivery Details */}
                         <div>
                             <h4 className="font-bold text-lg mb-2">1. Delivery & Installation Details</h4>
                             <div className="space-y-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="address">Full Address</Label>
                                     <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="e.g., 123 Moboflix St, Tech City" required />
+                                </div>
+                                {/* --- NEW: Contact Number Input --- */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="contactNumber">Contact Number</Label>
+                                    <Input id="contactNumber" type="tel" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} placeholder="e.g., 9876543210" required />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="appointmentDate">Preferred Date & Time</Label>
@@ -146,7 +151,6 @@ export default function ProductOrderPage() {
                             </div>
                         </div>
 
-                        {/* Step 2: Choose Technician */}
                         <div>
                             <h4 className="font-bold text-lg mb-2">2. Choose Your Technician</h4>
                              <div className="space-y-3">

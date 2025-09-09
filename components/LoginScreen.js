@@ -1,95 +1,143 @@
 "use client";
 
-import React, { useState } from 'react';
-import { auth, db } from '../firebase/config'; // CORRECTED IMPORT
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { auth } from '../firebase/config';
+import { signInWithEmailAndPassword, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { User, Wrench } from 'lucide-react';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [userType, setUserType] = useState('customer');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [checkingAuth, setCheckingAuth] = useState(true); // State to check for existing session
+    const router = useRouter();
 
-    const handleSignUp = () => {
-        if (userType !== 'customer') {
-            alert('Access Denied: Only customer accounts can be created here.');
-            return;
-        }
-        if (email === '' || password === '') {
-            alert('Missing Information: Please enter both email and password.');
-            return;
-        }
+    // Check for a persistent session when the component loads
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // A user is already signed in. Let's redirect them.
+                if (user.isAnonymous) {
+                    router.push('/dashboard/customer');
+                } else {
+                    // Assumes non-anonymous users are technicians
+                    router.push('/dashboard/technician');
+                }
+            } else {
+                // No user is signed in. Show the login page.
+                setCheckingAuth(false);
+            }
+        });
+
+        // Cleanup subscription on component unmount
+        return () => unsubscribe();
+    }, [router]);
+
+    const handleAnonymousLogin = async () => {
         setLoading(true);
-        // CORRECTED: Uses 'auth' which is the correct variable
-        createUserWithEmailAndPassword(auth, email, password)
-            .then(async (userCredential) => {
-                const user = userCredential.user;
-                await setDoc(doc(db, "users", user.uid), {
-                    role: 'customer',
-                    email: user.email
-                });
-                alert('Success! Customer account created. Please log in.');
-            })
-            .catch((error) => alert(`Sign Up Error: ${error.message}`))
-            .finally(() => setLoading(false));
+        setError('');
+        try {
+            await signInAnonymously(auth);
+            router.push('/dashboard/customer');
+        } catch (error) {
+            console.error("Anonymous Sign In Error:", error);
+            setError(`Error: Could not start session. Please try again.`);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleLogin = () => {
+    const handleTechnicianLogin = () => {
         if (email === '' || password === '') {
-            alert('Missing Information: Please enter both email and password.');
+            setError('Please enter both email and password.');
             return;
         }
         setLoading(true);
-        // CORRECTED: Uses 'auth' which is the correct variable
+        setError('');
         signInWithEmailAndPassword(auth, email, password)
-            .catch((error) => alert(`Login Error: Invalid email or password.`))
+            .then(() => {
+                router.push('/dashboard/technician');
+            })
+            .catch((error) => {
+                console.error("Technician Login Error:", error);
+                setError('Login Error: Invalid email or password.');
+            })
             .finally(() => setLoading(false));
     };
+
+    // Show a loading screen while we check for an existing session
+    if (checkingAuth) {
+        return (
+            <div className="min-h-screen w-full flex items-center justify-center bg-slate-900">
+                <p className="text-white animate-pulse">Loading Session...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-900 p-4">
             <Card className="w-full max-w-md bg-slate-800 border-slate-700 text-white">
                 <CardHeader className="text-center">
-                    <CardTitle className="text-4xl font-black uppercase tracking-widest">Moboflix</CardTitle>
-                    <CardDescription className="text-slate-400">Welcome to Premium At-Home Repair</CardDescription>
+                    <CardTitle className="text-4xl font-black uppercase tracking-widest text-white">Moboflix</CardTitle>
+                    <CardDescription className="text-slate-400">Premium At-Home Mobile Repair</CardDescription>
                 </CardHeader>
+
                 <CardContent className="space-y-6">
-                    <div className="grid grid-cols-2 gap-2 bg-slate-900 p-1 rounded-md">
-                        <Button variant={userType === 'customer' ? 'secondary' : 'ghost'} onClick={() => setUserType('customer')}>Customer</Button>
-                        <Button variant={userType === 'technician' ? 'secondary' : 'ghost'} onClick={() => setUserType('technician')}>Technician</Button>
+                    <div>
+                        <Button
+                            onClick={handleAnonymousLogin}
+                            disabled={loading}
+                            className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-lg font-bold text-white flex items-center gap-2"
+                        >
+                            <User className="h-5 w-5" />
+                            {loading ? 'Starting Session...' : 'Continue as Customer'}
+                        </Button>
+                        <p className="text-center text-xs text-slate-500 mt-2">No account needed. Fast & easy booking.</p>
                     </div>
+
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-slate-700" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-slate-800 px-2 text-slate-500">
+                                Or
+                            </span>
+                        </div>
+                    </div>
+
                     <div className="space-y-4">
+                        <h3 className="flex items-center justify-center gap-2 text-sm font-semibold text-slate-400">
+                            <Wrench className="h-4 w-4" />
+                            Technician Login
+                        </h3>
                         <div className="space-y-2">
-                            <Label htmlFor="email">Email Address</Label>
-                            <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+                            <Label htmlFor="email">Technician Email</Label>
+                            <Input id="email" type="email" placeholder="tech@moboflix.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="password">Password</Label>
-                            <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+                            <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading} />
                         </div>
                     </div>
                 </CardContent>
+
                 <CardFooter className="flex flex-col gap-4">
-                    <Button onClick={handleLogin} disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                        {loading ? 'Logging in...' : 'Login'}
+                     <Button onClick={handleTechnicianLogin} disabled={loading} className="w-full bg-slate-700 hover:bg-slate-600">
+                        {loading ? 'Logging in...' : 'Login as Technician'}
                     </Button>
-                    {userType === 'customer' && (
-                        <Button variant="link" onClick={handleSignUp} className="text-slate-400">
-                            Don't have an account? Sign Up
-                        </Button>
-                    )}
+                    {error && <p className="text-sm text-red-400">{error}</p>}
                 </CardFooter>
             </Card>
              <div className="text-center py-4 mt-4">
                 <p className="text-sm text-slate-500">
-                    App built by <a href="https://github.com/RachitSE" target="_blank" rel="noopener noreferrer" className="font-semibold text-slate-400 hover:text-white underline">Rachit</a> and Mridul
-                </p>
+Mobiflix 2025.                </p>
             </div>
         </div>
     );

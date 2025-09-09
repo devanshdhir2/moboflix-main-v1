@@ -4,11 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../../../context/AuthContext';
 import { db } from '../../../../../firebase/config';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Spinner from '../../../../../components/Spinner';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import ChatComponent from '../../../../../components/ChatComponent';
 
 const CountdownTimer = ({ appointmentDate }) => {
     const [timeLeft, setTimeLeft] = useState('');
@@ -48,29 +49,82 @@ const DetailRow = ({ label, value, icon, isLink = false }) => (
     </div>
 );
 
-export default function JobDetailPage({ params }) {
+export default function JobDetailPage() {
     const { user } = useAuth();
     const router = useRouter();
+    const params = useParams();
     const { jobId } = params;
 
     const [job, setJob] = useState(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
-
+    
+    // Fetches job details
     useEffect(() => {
         if (!user || !jobId) return;
         const ticketRef = doc(db, 'tickets', jobId);
-        const unsubscribe = onSnapshot(ticketRef, (doc) => {
-            if (doc.exists()) {
-                setJob({ id: doc.id, ...doc.data() });
-            } else {
-                alert("Job not found.");
+        const unsubscribe = onSnapshot(ticketRef, 
+            (doc) => {
+                if (doc.exists()) {
+                    setJob({ id: doc.id, ...doc.data() });
+                } else {
+                    alert("Job not found.");
+                    router.push('/dashboard/technician');
+                }
+                setLoading(false);
+            },
+            (error) => {
+                console.error("Error fetching job details:", error);
+                alert("Could not load job. You may not have permission.");
+                setLoading(false);
                 router.push('/dashboard/technician');
             }
-            setLoading(false);
-        });
+        );
         return () => unsubscribe();
     }, [user, jobId, router]);
+
+    // --- UPDATED: Manages live location sharing every 30 seconds ---
+    useEffect(() => {
+        let intervalId = null;
+
+        const updateLocation = () => {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        const ticketRef = doc(db, 'tickets', jobId);
+                        updateDoc(ticketRef, {
+                            technicianLocation: {
+                                lat: latitude,
+                                lng: longitude,
+                                timestamp: new Date()
+                            }
+                        });
+                        console.log(`[Location Update] Position sent at ${new Date().toLocaleTimeString()}`);
+                    },
+                    (error) => {
+                        console.error("Geolocation Error:", error.message);
+                        // Don't alert here to avoid spamming the technician
+                    },
+                    { enableHighAccuracy: true }
+                );
+            }
+        };
+
+        // Start sharing location only when the job status is 'In Progress'
+        if (job && job.status === 'In Progress') {
+            updateLocation(); // Send location once immediately
+            intervalId = setInterval(updateLocation, 30000); // And then every 30 seconds
+        }
+
+        // Cleanup: Stop the interval when the component unmounts or the job status changes
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+                console.log("[Location Update] Stopped sharing location.");
+            }
+        };
+    }, [job, jobId]); // Reruns when job status changes
 
     const handleNavigate = (address) => {
         const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
@@ -78,32 +132,30 @@ export default function JobDetailPage({ params }) {
     };
 
     const handleAcceptJob = () => {
-        if (!confirm("Are you sure you want to accept this job?")) return;
-        updateJobStatus('In Progress');
-    };
-
-    const updateJobStatus = async (newStatus) => {
+        if (!confirm("Are you sure you want to accept this job? This will start sharing your live location with the customer.")) return;
+        
         setActionLoading(true);
-        const ticketRef = doc(db, 'tickets', job.id);
-        try {
-            await updateDoc(ticketRef, { status: newStatus });
-            alert("Status Updated!");
-            router.push('/dashboard/technician');
-        } catch (error) {
-            alert(`Error: ${error.message}`);
-        } finally {
-            setActionLoading(false);
-        }
+        const ticketRef = doc(db, 'tickets', jobId);
+        updateDoc(ticketRef, { 
+            status: 'In Progress',
+            technicianId: user.uid,
+            technicianName: user.displayName || user.email 
+        })
+        .then(() => alert("Job accepted!"))
+        .catch((error) => alert(`Error: ${error.message}`))
+        .finally(() => setActionLoading(false));
     };
 
     const renderActionButton = () => {
+        if (!job) return null;
+
         if (job.status === 'Pending') {
             return <Button onClick={handleAcceptJob} disabled={actionLoading} className="w-full bg-green-600 hover:bg-green-700">Accept This Job</Button>;
         }
         if (job.status === 'In Progress') {
             return (
                 <div className="text-center space-y-4">
-                    <p className="text-slate-600 font-semibold animate-pulse">Waiting for customer to confirm start...</p>
+                    <p className="text-slate-600 font-semibold animate-pulse">Sharing location... Waiting for customer confirmation.</p>
                     <Button onClick={() => handleNavigate(job.address)} className="w-full bg-purple-600 hover:bg-purple-700">Navigate to Address</Button>
                 </div>
             );
@@ -118,16 +170,18 @@ export default function JobDetailPage({ params }) {
                 </div>
             );
         }
-        return null;
+        return <p className="text-sm text-center text-slate-500">No actions available.</p>;
     };
 
     if (loading) return <Spinner />;
-    if (!job) return <div className="p-8 text-center">Job not found.</div>;
+    if (!job) return <div className="p-8 text-center">Job data could not be loaded.</div>;
 
     const appointmentDateTime = job.appointmentDate?.toDate ? job.appointmentDate.toDate() : new Date(job.appointmentDate);
+    
+    const chatEnabledStatuses = ['In Progress', 'Work Started', 'Pending Payment', 'Completed'];
 
     return (
-        <div className="container mx-auto max-w-4xl px-4 py-8">
+        <div className="container mx-auto max-w-4xl px-4 py-8 space-y-8">
             <Card>
                 <CardHeader>
                     <CardTitle className="text-2xl md:text-3xl">{job.deviceInfo}</CardTitle>
@@ -139,7 +193,6 @@ export default function JobDetailPage({ params }) {
                         <DetailRow label="Time Slot" value={appointmentDateTime.toLocaleString()} icon="🕒" />
                         <DetailRow label="Address" value={job.address} icon="📍" />
                         <DetailRow label="Customer Email" value={job.customerEmail} icon="✉️" />
-                        {/* --- NEW FIELD --- */}
                         {job.contactNumber && <DetailRow label="Contact Number" value={`tel:${job.contactNumber}`} icon="📞" isLink={true} />}
                     </div>
                 </CardContent>
@@ -147,6 +200,10 @@ export default function JobDetailPage({ params }) {
                     {actionLoading ? <div className="flex justify-center w-full"><Spinner/></div> : renderActionButton()}
                 </CardFooter>
             </Card>
+
+            {chatEnabledStatuses.includes(job.status) && (
+                <ChatComponent ticketId={job.id} />
+            )}
         </div>
     );
 }

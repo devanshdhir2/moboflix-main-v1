@@ -1,6 +1,8 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage"; // --- ADDED: Import for Storage ---
+
 
 // --- PASTE YOUR FIREBASE WEB CONFIG HERE ---
 // You can get this from your Firebase project settings
@@ -19,5 +21,6 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app); // --- ADDED: Initialize Storage ---
 
-export { app, auth, db };
+export { app, db, auth, storage }; // --- ADDED: Export Storage ---

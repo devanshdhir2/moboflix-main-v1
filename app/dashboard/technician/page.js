@@ -6,6 +6,7 @@ import { db } from '../../../firebase/config';
 import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
 import Link from 'next/link';
 import Spinner from '../../../components/Spinner';
+import { ShoppingCart } from 'lucide-react'; // Import icon for products
 
 // Hardcoded Warehouse Location
 const WAREHOUSE_LOCATION = "patiala, Punjab, India";
@@ -14,10 +15,21 @@ const JobItem = ({ job, disabled }) => {
     const appointmentDate = job.appointmentDate?.toDate ? job.appointmentDate.toDate() : new Date(job.appointmentDate);
     const itemClasses = `bg-white rounded-lg shadow-md p-6 mb-4 transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : 'transform hover:scale-105'}`;
     const detailUrl = `/dashboard/technician/job/${job.id}`;
+    
+    // --- UPDATED: Differentiate between repair jobs and product deliveries ---
+    const isProductOrder = job.type === 'product';
 
     const content = (
         <div className={itemClasses}>
-            <h3 className="text-xl font-bold text-gray-800">{job.deviceInfo}</h3>
+             {/* --- ADDED: A clear badge for product orders --- */}
+            {isProductOrder && (
+                <div className="text-xs font-bold uppercase text-white bg-green-500 inline-block px-2 py-1 rounded-full mb-2">
+                    Product Delivery
+                </div>
+            )}
+            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                {job.deviceInfo}
+            </h3>
             <p className="text-gray-600 truncate">{job.issueDescription}</p>
             <div className="border-t border-gray-200 mt-4 pt-4">
                 <p className="text-sm text-gray-500 mb-1">📍 {job.address}</p>
@@ -42,7 +54,7 @@ export default function TechnicianDashboard() {
     useEffect(() => {
         if (!user) return;
 
-        // Listener for the active job
+        // Listener for the active job (includes both repairs and product deliveries)
         const activeJobQuery = query(
             collection(db, "tickets"),
             where("technicianId", "==", user.uid),
@@ -59,7 +71,7 @@ export default function TechnicianDashboard() {
             setLoading(false);
         });
 
-        // Listener for new assigned jobs
+        // Listener for new assigned jobs (includes both repairs and product deliveries)
         const assignedJobsQuery = query(
             collection(db, "tickets"),
             where("technicianId", "==", user.uid),
@@ -91,21 +103,7 @@ export default function TechnicianDashboard() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <h2 className="text-3xl font-bold text-gray-800 mb-6">Technician Dashboard</h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                <button onClick={handleNavigateToWarehouse} className="flex items-center justify-center p-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-all">
-                    <span>📍</span>
-                    <span className="ml-2">To Warehouse</span>
-                </button>
-                <Link href="/dashboard/technician/view-inventory" className="flex items-center justify-center p-4 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-all">
-                    <span>📦</span>
-                    <span className="ml-2">View Inventory</span>
-                </Link>
-                {/* CORRECTED: This now links to the request parts page */}
-                <Link href="/dashboard/technician/request-parts" className="flex items-center justify-center p-4 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 transition-all">
-                    <span>🔧</span>
-                    <span className="ml-2">Request Parts</span>
-                </Link>
-            </div>
+
             
             {activeJob && (
                 <div className="mb-8">

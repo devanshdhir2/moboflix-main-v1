@@ -6,8 +6,11 @@ import { db } from '../../../firebase/config';
 import { collection, query, onSnapshot, orderBy, getDocs, where } from 'firebase/firestore';
 import Link from 'next/link';
 import Spinner from '../../../components/Spinner';
+import { Button } from "@/components/ui/button"; // --- FIXED: IMPORTED BUTTON ---
+import { ShoppingCart } from 'lucide-react';
 
 const TicketItem = ({ ticket }) => {
+    // ... (This component remains unchanged)
     const getStatusStyle = (status) => {
         switch (status) {
             case 'Pending': return 'bg-yellow-500 text-white';
@@ -18,10 +21,7 @@ const TicketItem = ({ ticket }) => {
             default: return 'bg-gray-500 text-white';
         }
     };
-
-    // CORRECTED: The link now points to the dynamic owner ticket detail page
     const detailUrl = `/dashboard/owner/ticket/${ticket.id}`;
-
     return (
         <Link href={detailUrl} className="block bg-white rounded-lg shadow-md p-6 mb-4 transition-transform transform hover:scale-105 hover:shadow-xl">
             <div className="flex justify-between items-start mb-3">
@@ -45,6 +45,7 @@ const TicketItem = ({ ticket }) => {
 };
 
 const TechnicianStatItem = ({ techStat }) => {
+    // ... (This component remains unchanged)
     const avgRating = techStat.totalJobs > 0 ? (techStat.totalRating / techStat.totalJobs).toFixed(1) : 'N/A';
     return (
         <div className="flex items-center bg-white rounded-lg shadow p-4 mb-3">
@@ -87,10 +88,10 @@ export default function OwnerDashboard() {
     }, [user]);
 
     const calculateStats = async (allTickets) => {
+        // ... (This function remains unchanged)
         const techQuery = query(collection(db, "users"), where("role", "==", "technician"));
         const techSnapshot = await getDocs(techQuery);
         const technicians = techSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().displayName || doc.data().email }));
-      
         const stats = technicians.map(tech => {
             const completedTickets = allTickets.filter(
                 ticket => ticket.technicianId === tech.id && ticket.status === 'Completed' && ticket.isReviewed
@@ -99,13 +100,11 @@ export default function OwnerDashboard() {
             const totalRating = completedTickets.reduce((sum, ticket) => sum + (ticket.rating || 0), 0);
             return { id: tech.id, name: tech.name, totalJobs, totalRating };
         });
-
         stats.sort((a, b) => {
             const avgA = a.totalJobs > 0 ? a.totalRating / a.totalJobs : 0;
             const avgB = b.totalJobs > 0 ? b.totalRating / b.totalJobs : 0;
             return avgB - avgA;
         });
-
         setTechnicianStats(stats);
     };
 
@@ -115,7 +114,15 @@ export default function OwnerDashboard() {
 
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Owner Dashboard</h2>
+             <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
+                <h2 className="text-3xl font-bold text-gray-800">Owner Dashboard</h2>
+                <Link href="/dashboard/owner/store">
+                    <Button className="flex items-center gap-2">
+                        <ShoppingCart className="h-5 w-5" />
+                        Manage Store
+                    </Button>
+                </Link>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-1">

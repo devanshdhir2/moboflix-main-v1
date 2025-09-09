@@ -174,7 +174,7 @@ export default function LoginScreen() {
                 </div>
             </Card>
             <div className="text-center py-4 mt-4">
-                <p className="text-sm text-slate-500">Mobiflix 2025.</p>
+                <p className="text-sm text-slate-500">Moboflix 2025.</p>
             </div>
         </div>
     );

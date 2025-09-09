@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import { db } from '../../../../firebase/config';
 import { collection, query, onSnapshot, where } from 'firebase/firestore';
@@ -8,7 +8,8 @@ import Link from 'next/link';
 import Spinner from '../../../../components/Spinner';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { ShoppingCart } from 'lucide-react';
+import { Input } from "@/components/ui/input"; // Import Input for search
+import { ShoppingCart, Search } from 'lucide-react';
 
 const ProductCard = ({ product }) => {
     return (
@@ -22,7 +23,6 @@ const ProductCard = ({ product }) => {
                 <p className="text-xl font-bold text-green-600 mt-2">₹{product.price}</p>
             </CardContent>
             <CardFooter>
-                {/* --- UPDATED: This now links to the dedicated order page --- */}
                 <Link href={`/dashboard/customer/store/${product.id}`} passHref className="w-full">
                     <Button className="w-full" disabled={!product.isAvailable}>
                         {product.isAvailable ? 'Buy Now' : 'Out of Stock'}
@@ -36,6 +36,12 @@ const ProductCard = ({ product }) => {
 export default function CustomerStorePage() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    // --- NEW: State for search and filter ---
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('All');
+
+    // --- NEW: Define categories for filtering ---
+    const categories = ['All', 'Display', 'Screen', 'Battery', 'Mobile Frame', 'Charging Circuit'];
 
     useEffect(() => {
         const q = query(collection(db, "products"), where("isAvailable", "==", true));
@@ -51,6 +57,16 @@ export default function CustomerStorePage() {
         return () => unsubscribe();
     }, []);
 
+    // --- NEW: Logic to filter products based on search and category ---
+    const filteredProducts = useMemo(() => {
+        return products.filter(product => {
+            const categoryMatch = selectedCategory === 'All' || (product.category && product.category === selectedCategory);
+            const searchMatch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                product.model.toLowerCase().includes(searchTerm.toLowerCase());
+            return categoryMatch && searchMatch;
+        });
+    }, [products, searchTerm, selectedCategory]);
+
     if (loading) return <Spinner />;
 
     return (
@@ -61,14 +77,40 @@ export default function CustomerStorePage() {
             </div>
             <p className="text-gray-500 mb-8">Buy genuine parts and accessories. A technician will deliver and install them for you.</p>
 
+            {/* --- NEW: Search and Filter UI --- */}
+            <div className="mb-8 space-y-4">
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input 
+                        type="text"
+                        placeholder="Search by product or model (e.g., iPhone 14 Pro)"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10"
+                    />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                    {categories.map(category => (
+                        <Button 
+                            key={category}
+                            variant={selectedCategory === category ? 'default' : 'outline'}
+                            onClick={() => setSelectedCategory(category)}
+                        >
+                            {category}
+                        </Button>
+                    ))}
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {products.length > 0 ? (
-                    products.map(product => (
+                {/* --- UPDATED: Use filteredProducts array --- */}
+                {filteredProducts.length > 0 ? (
+                    filteredProducts.map(product => (
                         <ProductCard key={product.id} product={product} />
                     ))
                 ) : (
                     <p className="col-span-full text-center text-gray-500 py-10">
-                        The store is currently empty. Please check back later!
+                        No products match your search. Try adjusting your filters.
                     </p>
                 )}
             </div>

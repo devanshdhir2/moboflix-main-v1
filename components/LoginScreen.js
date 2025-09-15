@@ -128,7 +128,7 @@ export default function LoginScreen() {
                             <User className="h-4 w-4 mr-2" /> Customer
                         </Button>
                         <Button variant={userType === 'technician' ? 'secondary' : 'ghost'} onClick={() => setUserType('technician')}>
-                            <Wrench className="h-4 w-4 mr-2" /> Technician
+                            <Wrench className="h-4 w-4 mr-2" /> Staff
                         </Button>
                     </div>
 

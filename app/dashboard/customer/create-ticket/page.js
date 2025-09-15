@@ -2,18 +2,16 @@
 
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
-import { db } from '../../../../firebase/config';
+import { db, FieldValue } from '../../../../firebase/config';
 import { collection, addDoc, getDocs, query, where, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Spinner from '../../../../components/Spinner';
 
-// Technician Item Component - Converted for Web
 const TechnicianItem = memo(({ item, onSelect, isSelected, isBooked }) => {
     const baseClasses = "flex items-center bg-white rounded-lg p-4 mb-3 border-2 transition-all cursor-pointer";
     const selectedClasses = "border-blue-500 bg-blue-500 text-white shadow-lg";
     const bookedClasses = "border-gray-200 bg-gray-100 opacity-60 cursor-not-allowed";
     const defaultClasses = "border-gray-200 hover:border-blue-400";
-
     const itemStyle = `${baseClasses} ${isBooked ? bookedClasses : (isSelected ? selectedClasses : defaultClasses)}`;
     const textColor = isSelected ? 'text-white' : 'text-gray-800';
     const subTextColor = isSelected ? 'text-blue-100' : 'text-gray-500';
@@ -40,7 +38,10 @@ export default function CreateTicketPage() {
     const router = useRouter();
     
     const [deviceInfo, setDeviceInfo] = useState('');
-    const [issueDescription, setIssueDescription] = useState('');
+    // --- UPDATED STATE for issue selection ---
+    const [mainIssue, setMainIssue] = useState(null);
+    const [subIssue, setSubIssue] = useState('');
+    
     const [address, setAddress] = useState('');
     const [contactNumber, setContactNumber] = useState('');
     const [isFetchingLocation, setIsFetchingLocation] = useState(false);
@@ -68,50 +69,36 @@ export default function CreateTicketPage() {
         fetchData().catch(console.error);
     }, []);
     
-    const getCombinedDateTime = useCallback(() => {
-        return new Date(`${date}T${time}`);
-    }, [date, time]);
+    const getCombinedDateTime = useCallback(() => new Date(`${date}T${time}`), [date, time]);
 
     const isTechnicianBooked = useCallback((technicianId) => {
         const oneHour = 60 * 60 * 1000;
-        const selectedTime = getCombinedDateTime();
-        const selectedTimeMs = selectedTime.getTime();
-
-        return allTickets.some(ticket => {
-            if (ticket.technicianId === technicianId) {
-                const ticketTimeMs = ticket.appointmentDate.getTime();
-                return Math.abs(selectedTimeMs - ticketTimeMs) < oneHour;
-            }
-            return false;
-        });
+        const selectedTimeMs = getCombinedDateTime().getTime();
+        return allTickets.some(ticket => 
+            ticket.technicianId === technicianId && Math.abs(selectedTimeMs - ticket.appointmentDate.getTime()) < oneHour
+        );
     }, [allTickets, getCombinedDateTime]);
 
     const handleGetCurrentLocation = () => {
-        if (!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser.");
-            return;
-        }
+        if (!navigator.geolocation) return alert("Geolocation is not supported by your browser.");
         setIsFetchingLocation(true);
         navigator.geolocation.getCurrentPosition(async (position) => {
             const { latitude, longitude } = position.coords;
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
             const data = await response.json();
-            if (data && data.display_name) {
-                setAddress(data.display_name);
-            } else {
-                alert("Could not determine address from your location.");
-            }
+            setAddress(data?.display_name || "Could not determine address.");
             setIsFetchingLocation(false);
         }, () => {
-            alert("Unable to retrieve your location. Please grant permission or enter it manually.");
+            alert("Unable to retrieve your location.");
             setIsFetchingLocation(false);
         });
     };
 
     const handleCreateTicket = async (e) => {
         e.preventDefault();
-        if (!deviceInfo || !issueDescription || !address || !contactNumber || !selectedTechnician) {
-            alert('Incomplete Form: Please fill out all fields, including contact number, and select a technician.');
+        const finalIssueDescription = subIssue ? `${mainIssue}: ${subIssue}` : mainIssue;
+        if (!deviceInfo || !finalIssueDescription || !address || !contactNumber || !selectedTechnician) {
+            alert('Incomplete Form: Please fill out all fields and select a technician.');
             return;
         }
         if (isTechnicianBooked(selectedTechnician.id)) {
@@ -123,14 +110,12 @@ export default function CreateTicketPage() {
             if (user) {
                 await addDoc(collection(db, "tickets"), {
                     customerId: user.uid,
-                    // --- UPDATED: Store guest status and a clearer name ---
-                    customerEmail: user.isAnonymous ? "Guest User" : user.email,
-                    isGuestTicket: user.isAnonymous, // The crucial flag
-                    contactNumber: contactNumber,
+                    customerEmail: user.email,
+                    contactNumber,
                     technicianId: selectedTechnician.id,
                     technicianName: selectedTechnician.displayName || selectedTechnician.email,
                     deviceInfo,
-                    issueDescription,
+                    issueDescription: finalIssueDescription, // Save combined issue
                     address,
                     appointmentDate: getCombinedDateTime(),
                     status: 'Pending',
@@ -146,6 +131,13 @@ export default function CreateTicketPage() {
         }
     };
     
+    // --- NEW: Dynamic options for dropdown ---
+    const issueOptions = {
+        Display: ["Original", "Good Quality", "Incel Display"],
+        'Charging Board': ["Original", "Copy"],
+        Battery: ["Original", "Other Brands", "Duplicate"]
+    };
+
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <h2 className="text-3xl font-bold text-gray-800">Book a Repair</h2>
@@ -156,10 +148,24 @@ export default function CreateTicketPage() {
                     <label className="text-lg font-semibold text-gray-700">1. What device needs repair?</label>
                     <input type="text" value={deviceInfo} onChange={(e) => setDeviceInfo(e.target.value)} placeholder="e.g., iPhone 13 Pro" className="w-full mt-2 p-4 border border-gray-300 rounded-lg" required />
                 </div>
+                {/* --- UPDATED ISSUE SECTION --- */}
                 <div>
                     <label className="text-lg font-semibold text-gray-700">2. Describe the issue</label>
-                    <textarea value={issueDescription} onChange={(e) => setIssueDescription(e.target.value)} placeholder="e.g., The screen is cracked after a drop." rows="4" className="w-full mt-2 p-4 border border-gray-300 rounded-lg" required></textarea>
+                    <div className="grid grid-cols-3 gap-4 mt-2">
+                        {['Display', 'Charging Board', 'Battery'].map(issue => (
+                            <button key={issue} type="button" onClick={() => { setMainIssue(issue); setSubIssue(''); }} className={`p-4 rounded-lg font-semibold border-2 ${mainIssue === issue ? 'bg-blue-600 text-white border-blue-600' : 'bg-white hover:border-blue-400'}`}>
+                                {issue}
+                            </button>
+                        ))}
+                    </div>
+                    {mainIssue && (
+                        <select value={subIssue} onChange={(e) => setSubIssue(e.target.value)} className="w-full mt-4 p-4 border border-gray-300 rounded-lg" required>
+                            <option value="" disabled>Select Quality for {mainIssue}...</option>
+                            {issueOptions[mainIssue].map(option => <option key={option} value={option}>{option}</option>)}
+                        </select>
+                    )}
                 </div>
+                {/* --- END OF UPDATED SECTION --- */}
                 <div>
                     <label className="text-lg font-semibold text-gray-700">3. Repair Address</label>
                     <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter your full address" className="w-full mt-2 p-4 border border-gray-300 rounded-lg" required />
@@ -168,7 +174,7 @@ export default function CreateTicketPage() {
                     </button>
                 </div>
                 <div>
-                    <label className="text-lg font-semibold text-gray-700">4. Contact Number (for WhatsApp)</label>
+                    <label className="text-lg font-semibold text-gray-700">4. Contact Number</label>
                     <input type="tel" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} placeholder="e.g., 9876543210" className="w-full mt-2 p-4 border border-gray-300 rounded-lg" required />
                 </div>
                 <div>
@@ -183,17 +189,9 @@ export default function CreateTicketPage() {
                     <div className="mt-2">
                         {technicians.length > 0 ? (
                             technicians.map(tech => (
-                                <TechnicianItem 
-                                    key={tech.id} 
-                                    item={tech}
-                                    onSelect={setSelectedTechnician}
-                                    isSelected={selectedTechnician && selectedTechnician.id === tech.id}
-                                    isBooked={isTechnicianBooked(tech.id)}
-                                />
+                                <TechnicianItem key={tech.id} item={tech} onSelect={setSelectedTechnician} isSelected={selectedTechnician?.id === tech.id} isBooked={isTechnicianBooked(tech.id)} />
                             ))
-                        ) : (
-                            <p className="text-gray-500">Loading technicians...</p>
-                        )}
+                        ) : ( <p className="text-gray-500">Loading technicians...</p> )}
                     </div>
                 </div>
                 <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white font-bold py-4 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition-all disabled:bg-gray-400">

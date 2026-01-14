@@ -6,14 +6,14 @@ import { getStorage } from "firebase/storage"; // --- ADDED: Import for Storage 
 
 // --- PASTE YOUR FIREBASE WEB CONFIG HERE ---
 // You can get this from your Firebase project settings
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCKWY1fRc8dQ30Gdr2Dd5W7pwlSKeDtwM4",
-  authDomain: "mobofix-app.firebaseapp.com",
-  projectId: "mobofix-app",
-  storageBucket: "mobofix-app.firebasestorage.app",
-  messagingSenderId: "369946427303",
-  appId: "1:369946427303:web:5c711390016aeb6a9cc082",
-  measurementId: "G-KF2QFT1B8B"
+  apiKey: "AIzaSyAY7bnfgdDD_oVbA0dkWvYwAn512Pz2Wxs",
+  authDomain: "moboflix-beb33.firebaseapp.com",
+  projectId: "moboflix-beb33",
+  storageBucket: "moboflix-beb33.firebasestorage.app",
+  messagingSenderId: "70346121750",
+  appId: "1:70346121750:web:8b6b84b9e9e7afbd94cb37"
 };
 
 // Initialize Firebase for Server-Side Rendering (SSR), prevent re-initialization

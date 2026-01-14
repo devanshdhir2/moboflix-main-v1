@@ -224,7 +224,7 @@ export default function LoginScreen() {
                     </div>
                     <div className="flex items-start gap-4">
                         <div className="p-3 bg-slate-800 rounded-xl text-emerald-400"><ShieldCheck className="w-6 h-6" /></div>
-                        <div><h3 className="font-bold text-lg text-white">Lifetime Warranty</h3></div>
+                        <div><h3 className="font-bold text-lg text-white">Genuine Parts with Warranty</h3></div>
                     </div>
                 </div>
                 <div className="relative z-10 text-slate-500 text-sm">© 2025 Moboflix India Pvt Ltd.</div>

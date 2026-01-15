@@ -1,28 +1,52 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../../../context/AuthContext';
-import { db } from '../../../../../firebase/config';
-import { doc, onSnapshot, updateDoc, getDocs, collection, query, where } from 'firebase/firestore';
-import { useRouter, useParams } from 'next/navigation';
-import Spinner from '../../../../../components/Spinner';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../../../../context/AuthContext";
+import { db } from "../../../../../firebase/config";
+import {
+    doc,
+    onSnapshot,
+    updateDoc,
+    getDocs,
+    collection,
+    query,
+    where,
+} from "firebase/firestore";
+import { useRouter, useParams } from "next/navigation";
+import Spinner from "../../../../../components/Spinner";
 
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+} from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
+import { CheckCircle } from "lucide-react";
+
+/* ------------------ DARK DETAIL ROW ------------------ */
 const DetailRow = ({ label, value }) => (
     <div>
-        <p className="text-sm font-medium text-gray-500">{label}</p>
-        <p className="mt-1 text-lg text-gray-900">{value}</p>
+        <p className="text-sm font-medium text-slate-400">{label}</p>
+        <p className="mt-1 text-lg text-slate-200">{value}</p>
     </div>
 );
 
+/* ------------------ DARK TECH SELECT ITEM ------------------ */
 const TechnicianSelectItem = ({ item, onSelect }) => (
-    <div onClick={() => onSelect(item)} className="flex items-center p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50">
+    <div
+        onClick={() => onSelect(item)}
+        className="flex items-center p-4 cursor-pointer border-b border-slate-700 hover:bg-slate-800 transition"
+    >
         <div className="text-3xl">👤</div>
         <div className="ml-4">
-            <p className="font-semibold text-gray-800">{item.displayName || item.email}</p>
-            <p className="text-sm text-gray-500">{item.specialty || 'General Repairs'}</p>
+            <p className="font-semibold text-slate-200">
+                {item.displayName || item.email}
+            </p>
+            <p className="text-sm text-slate-400">
+                {item.specialty || "General Repairs"}
+            </p>
         </div>
     </div>
 );
@@ -39,159 +63,294 @@ export default function OwnerTicketDetailPage() {
     const [isModalVisible, setModalVisible] = useState(false);
     const [technicians, setTechnicians] = useState([]);
 
+    /* ------------------ FETCH TICKET ------------------ */
     useEffect(() => {
         if (!user || !ticketId) return;
-        const ticketRef = doc(db, 'tickets', ticketId);
-        const unsubscribe = onSnapshot(ticketRef, (doc) => {
-            if (doc.exists()) {
-                setTicket({ id: doc.id, ...doc.data() });
-            } else {
-                alert("Ticket not found.");
-                router.push('/dashboard/owner');
+
+        const ticketRef = doc(db, "tickets", ticketId);
+        const unsub = onSnapshot(
+            ticketRef,
+            (snapshot) => {
+                if (snapshot.exists()) {
+                    setTicket({ id: snapshot.id, ...snapshot.data() });
+                } else {
+                    alert("Ticket not found.");
+                    router.push("/dashboard/owner");
+                }
+                setLoading(false);
+            },
+            (err) => {
+                console.error("Error loading ticket:", err);
+                setLoading(false);
             }
-            setLoading(false);
-        }, (error) => {
-            console.error("Error fetching ticket for owner:", error);
-            setLoading(false);
-        });
-        return () => unsubscribe();
+        );
+
+        return () => unsub();
     }, [user, ticketId, router]);
-    
+
+    /* ------------------ FETCH TECHNICIANS ON MODAL OPEN ------------------ */
     useEffect(() => {
-        const fetchTechnicians = async () => {
-            const techQuery = query(collection(db, "users"), where("role", "==", "technician"));
-            const querySnapshot = await getDocs(techQuery);
-            const fetchedTechnicians = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-            setTechnicians(fetchedTechnicians);
+        if (!isModalVisible) return;
+
+        const fetchTechs = async () => {
+            const q = query(
+                collection(db, "users"),
+                where("role", "==", "technician")
+            );
+            const snap = await getDocs(q);
+            setTechnicians(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
         };
-        if (isModalVisible) {
-            fetchTechnicians().catch(console.error);
-        }
+
+        fetchTechs().catch(console.error);
     }, [isModalVisible]);
 
-    const updateTicketStatus = async (newStatus, extraData = {}) => {
+    /* ------------------ UPDATE TICKET STATUS ------------------ */
+    const updateStatus = async (newStatus, extra = {}) => {
         setActionLoading(true);
-        const ticketRef = doc(db, 'tickets', ticket.id);
         try {
-            await updateDoc(ticketRef, { status: newStatus, ...extraData });
-            alert(`Status successfully updated to "${newStatus}"!`);
-        } catch (error) {
-            alert(`Error: ${error.message}`);
+            await updateDoc(doc(db, "tickets", ticket.id), {
+                status: newStatus,
+                ...extra,
+            });
+            alert(`Updated to "${newStatus}"`);
+        } catch (err) {
+            alert(err.message);
         } finally {
             setActionLoading(false);
         }
     };
 
-    const handleReassign = async (newTechnician) => {
+    /* ------------------ REASSIGN TECH ------------------ */
+    const handleReassign = (tech) => {
         setModalVisible(false);
-        updateTicketStatus('Pending', {
-            technicianId: newTechnician.id,
-            technicianName: newTechnician.displayName || newTechnician.email,
+        updateStatus("Pending", {
+            technicianId: tech.id,
+            technicianName: tech.displayName || tech.email,
         });
     };
 
-    const handleApprovePayment = () => {
-        updateTicketStatus('Completed');
-    };
-
+    /* ------------------ MANUAL START ------------------ */
     const handleManualStart = () => {
-        const actionText = ticket.type === 'product' ? 'delivery' : 'repair';
-        if (!confirm(`Are you sure you want to manually start this ${actionText} for the guest?`)) return;
-        updateTicketStatus('Work Started');
+        const type = ticket.type === "product" ? "delivery" : "repair";
+
+        if (!confirm(`Manually start this ${type}?`)) return;
+
+        updateStatus("Work Started");
     };
 
-    if (loading) return <Spinner />;
-    if (!ticket) return <div className="p-8 text-center">Ticket not found.</div>;
+    /* ------------------ APPROVE PAYMENT ------------------ */
+    const handleApprovePayment = () => updateStatus("Completed");
 
-    const appointmentDate = ticket.appointmentDate?.toDate ? ticket.appointmentDate.toDate() : new Date(ticket.appointmentDate);
+    if (loading)
+        return (
+            <div className="flex justify-center items-center h-screen bg-slate-950">
+                <Spinner />
+            </div>
+        );
+
+    if (!ticket)
+        return (
+            <div className="text-center text-slate-300 p-10 bg-slate-950">
+                Ticket not found
+            </div>
+        );
+
+    const appointmentDate = ticket.appointmentDate?.toDate
+        ? ticket.appointmentDate.toDate()
+        : new Date(ticket.appointmentDate);
 
     return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">{ticket.deviceInfo}</h2>
-            <p className="text-lg text-gray-600 mb-6">Admin view for Ticket #{ticket.id.substring(0,6)}...</p>
+        <div className="min-h-screen bg-slate-950 text-slate-200 px-4 sm:px-6 lg:px-8 py-8">
+
+            {/* ------------------ PAGE TITLE ------------------ */}
+            <h2 className="text-3xl font-bold text-white mb-2">
+                {ticket.deviceInfo}
+            </h2>
+            <p className="text-lg text-slate-400 mb-6">
+                Admin view for Ticket #{ticket.id.substring(0, 6)}…
+            </p>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                {/* ------------------ LEFT SECTION ------------------ */}
                 <div className="lg:col-span-2 space-y-6">
-                    <Card>
-                        <CardHeader><CardTitle>Ticket Details</CardTitle></CardHeader>
+
+                    {/* DETAILS CARD */}
+                    <Card className="bg-slate-900/70 border border-slate-800">
+                        <CardHeader>
+                            <CardTitle className="text-white">Ticket Details</CardTitle>
+                        </CardHeader>
+
                         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
                             <DetailRow label="Customer" value={ticket.customerEmail} />
-                            <DetailRow label="Contact" value={ticket.contactNumber || 'Not Provided'} />
-                            <DetailRow label="Technician" value={ticket.technicianName} />
+                            <DetailRow
+                                label="Contact"
+                                value={ticket.contactNumber || "Not Provided"}
+                            />
+                            <DetailRow
+                                label="Technician"
+                                value={ticket.technicianName}
+                            />
                             <DetailRow label="Status" value={ticket.status} />
-                            <DetailRow label="Scheduled For" value={appointmentDate.toLocaleString()} />
+
+                            <DetailRow
+                                label="Scheduled For"
+                                value={appointmentDate.toLocaleString()}
+                            />
+
                             <DetailRow label="Address" value={ticket.address} />
-                            {ticket.finalAmount && <DetailRow label="Final Amount" value={`₹${ticket.finalAmount}`} />}
+
+                            {ticket.finalAmount && (
+                                <DetailRow
+                                    label="Final Amount"
+                                    value={`₹${ticket.finalAmount}`}
+                                />
+                            )}
                         </CardContent>
                     </Card>
+
+                    {/* GUEST BADGE */}
                     {ticket.isGuestTicket && (
-                         <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md">
-                            <p className="font-bold">This is a Guest Ticket</p>
-                            <p className="text-sm">The customer created this request without signing up.</p>
+                        <div className="bg-blue-900/40 border border-blue-700 text-blue-300 p-4 rounded-md">
+                            <p className="font-bold">Guest Ticket</p>
+                            <p className="text-sm">
+                                This request was created without signing in.
+                            </p>
                         </div>
                     )}
-                    <Card>
-                        <CardHeader><CardTitle>Customer Review</CardTitle></CardHeader>
+
+                    {/* REVIEW CARD */}
+                    <Card className="bg-slate-900/70 border border-slate-800">
+                        <CardHeader>
+                            <CardTitle className="text-white">Customer Review</CardTitle>
+                        </CardHeader>
+
                         <CardContent>
-                        {ticket.isReviewed ? (
-                            <div className="space-y-2">
-                                <div className="flex items-center">
-                                    {[...Array(5)].map((_, i) => (
-                                        <span key={i} className={`text-2xl ${i < ticket.rating ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
-                                    ))}
+                            {ticket.isReviewed ? (
+                                <div className="space-y-2">
+                                    <div className="flex items-center">
+                                        {[...Array(5)].map((_, i) => (
+                                            <span
+                                                key={i}
+                                                className={`text-2xl ${i < ticket.rating
+                                                    ? "text-yellow-400"
+                                                    : "text-slate-600"
+                                                    }`}
+                                            >
+                                                ★
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <p className="text-slate-400 italic">
+                                        "{ticket.review || "No written review provided."}"
+                                    </p>
                                 </div>
-                                <p className="text-gray-600 italic">"{ticket.review || 'No written review provided.'}"</p>
-                            </div>
-                        ) : <p className="text-gray-500">The customer has not left a review yet.</p>}
+                            ) : (
+                                <p className="text-slate-500">
+                                    No review has been left yet.
+                                </p>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
 
-                <div className="lg:col-span-1">
-                    <Card>
-                         <CardHeader><CardTitle>Admin Actions</CardTitle></CardHeader>
-                         <CardContent className="space-y-4">
-                         {actionLoading ? <Spinner/> : (
-                             <div className="space-y-4">
-                                {/* --- UPDATED: Logic now handles both product and repair guest tickets --- */}
-                                {ticket.isGuestTicket && ticket.status === 'In Progress' && (
-                                     <div className="space-y-4">
-                                        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md">
-                                            <p className="font-bold">Guest Action Required</p>
-                                            <p className="text-sm">The guest customer is offline. You can override and start it manually.</p>
-                                        </div>
-                                         <Button onClick={handleManualStart} className="w-full bg-indigo-600 hover:bg-indigo-700 flex items-center gap-2">
-                                             <CheckCircle className="h-5 w-5"/>
-                                             {`Manually Start ${ticket.type === 'product' ? 'Delivery' : 'Repair'}`}
-                                         </Button>
-                                    </div>
-                                )}
-                                {ticket.status === 'Pending Payment' && (
-                                     <Button onClick={handleApprovePayment} className="w-full bg-green-600 hover:bg-green-700">Approve Payment (₹{ticket.finalAmount})</Button>
-                                )}
-                                {ticket.status !== 'Completed' && (
-                                     <Button onClick={() => setModalVisible(true)} className="w-full">Reassign Technician</Button>
-                                )}
-                                {ticket.status === 'Completed' && <p className="text-sm text-gray-500 text-center">No actions available for completed tickets.</p>}
-                             </div>
-                         )}
-                         </CardContent>
+                {/* ------------------ RIGHT SECTION (ADMIN ACTIONS) ------------------ */}
+                <div>
+                    <Card className="bg-slate-900/70 border border-slate-800">
+                        <CardHeader>
+                            <CardTitle className="text-white">Admin Actions</CardTitle>
+                        </CardHeader>
+
+                        <CardContent className="space-y-4">
+                            {actionLoading ? (
+                                <Spinner />
+                            ) : (
+                                <>
+
+                                    {/* Manual Start for Guest */}
+                                    {ticket.isGuestTicket &&
+                                        ticket.status === "In Progress" && (
+                                            <div className="space-y-4">
+
+                                                <div className="bg-yellow-900/30 border border-yellow-700 text-yellow-300 p-4 rounded-md">
+                                                    <p className="font-bold">Guest Offline</p>
+                                                    <p className="text-sm">
+                                                        You can manually start this job.
+                                                    </p>
+                                                </div>
+
+                                                <Button
+                                                    onClick={handleManualStart}
+                                                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2"
+                                                >
+                                                    <CheckCircle className="h-5 w-5" />
+                                                    Start {ticket.type === "product" ? "Delivery" : "Repair"}
+                                                </Button>
+                                            </div>
+                                        )}
+
+                                    {/* Approve Payment */}
+                                    {ticket.status === "Pending Payment" && (
+                                        <Button
+                                            onClick={handleApprovePayment}
+                                            className="w-full bg-green-600 hover:bg-green-700 text-white"
+                                        >
+                                            Approve Payment (₹{ticket.finalAmount})
+                                        </Button>
+                                    )}
+
+                                    {/* Reassign */}
+                                    {ticket.status !== "Completed" && (
+                                        <Button
+                                            onClick={() => setModalVisible(true)}
+                                            className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200"
+                                        >
+                                            Reassign Technician
+                                        </Button>
+                                    )}
+
+                                    {ticket.status === "Completed" && (
+                                        <p className="text-center text-slate-500">
+                                            No actions available.
+                                        </p>
+                                    )}
+                                </>
+                            )}
+                        </CardContent>
                     </Card>
                 </div>
             </div>
 
+            {/* ------------------ DARK GLASS MODAL ------------------ */}
             {isModalVisible && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[80vh] flex flex-col">
-                        <h3 className="text-xl font-bold p-6 border-b">Select a New Technician</h3>
-                        <div className="overflow-y-auto">
-                            {technicians.map(tech => <TechnicianSelectItem key={tech.id} item={tech} onSelect={handleReassign} />)}
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-xl flex items-center justify-center z-40">
+                    <div className="bg-slate-900/80 border border-slate-700 rounded-xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden backdrop-blur-xl">
+
+                        <h3 className="text-xl font-bold text-white p-6 border-b border-slate-700">
+                            Select a Technician
+                        </h3>
+
+                        <div className="max-h-[60vh] overflow-y-auto">
+                            {technicians.map((tech) => (
+                                <TechnicianSelectItem
+                                    key={tech.id}
+                                    item={tech}
+                                    onSelect={handleReassign}
+                                />
+                            ))}
                         </div>
-                        <Button variant="ghost" onClick={() => setModalVisible(false)} className="p-4 border-t">Cancel</Button>
+
+                        <Button
+                            variant="ghost"
+                            onClick={() => setModalVisible(false)}
+                            className="w-full p-4 border-t border-slate-700 text-slate-300 hover:bg-slate-800"
+                        >
+                            Cancel
+                        </Button>
                     </div>
                 </div>
             )}
         </div>
     );
 }
-

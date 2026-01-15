@@ -1,31 +1,51 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '../../../../context/AuthContext';
-import { db } from '../../../../firebase/config';
-import { collection, query, onSnapshot, where } from 'firebase/firestore';
-import Link from 'next/link';
-import Spinner from '../../../../components/Spinner';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input"; // Import Input for search
-import { ShoppingCart, Search } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from "react";
+import { db } from "../../../../firebase/config";
+import { collection, query, onSnapshot, where } from "firebase/firestore";
+import Link from "next/link";
+import Spinner from "../../../../components/Spinner";
 
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+    CardFooter,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+
+import { ShoppingCart, Search } from "lucide-react";
+
+// DARK THEME PRODUCT CARD
 const ProductCard = ({ product }) => {
     return (
-        <Card className="flex flex-col">
+        <Card className="flex flex-col bg-slate-900/70 border border-slate-800 shadow-lg rounded-lg">
             <CardHeader className="p-0">
-                <img src={product.imageUrl} alt={product.name} className="w-full h-48 object-cover rounded-t-lg" />
+                <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="w-full h-48 object-cover rounded-t-lg"
+                />
             </CardHeader>
+
             <CardContent className="flex-1 p-4">
-                <CardTitle className="text-lg">{product.name}</CardTitle>
-                <CardDescription>For {product.model}</CardDescription>
-                <p className="text-xl font-bold text-green-600 mt-2">₹{product.price}</p>
+                <CardTitle className="text-lg text-white">{product.name}</CardTitle>
+                <CardDescription className="text-slate-400">
+                    For {product.model}
+                </CardDescription>
+                <p className="text-xl font-bold text-green-400 mt-2">₹{product.price}</p>
             </CardContent>
+
             <CardFooter>
                 <Link href={`/dashboard/customer/store/${product.id}`} passHref className="w-full">
-                    <Button className="w-full" disabled={!product.isAvailable}>
-                        {product.isAvailable ? 'Buy Now' : 'Out of Stock'}
+                    <Button
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        disabled={!product.isAvailable}
+                    >
+                        {product.isAvailable ? "Buy Now" : "Out of Stock"}
                     </Button>
                 </Link>
             </CardFooter>
@@ -36,33 +56,57 @@ const ProductCard = ({ product }) => {
 export default function CustomerStorePage() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    // --- NEW: State for search and filter ---
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('All');
 
-    // --- NEW: Define categories for filtering ---
-    const categories = ['All', 'Display', 'Screen', 'Battery', 'Mobile Frame', 'Charging Circuit'];
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("All");
 
+    const categories = [
+        "All",
+        "Display",
+        "Screen",
+        "Battery",
+        "Mobile Frame",
+        "Charging Circuit",
+    ];
+
+    // Fetch products
     useEffect(() => {
-        const q = query(collection(db, "products"), where("isAvailable", "==", true));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const fetchedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setProducts(fetchedProducts);
-            setLoading(false);
-        }, (error) => {
-            console.error("Error fetching products: ", error);
-            alert("Could not load the store. Please try again later.");
-            setLoading(false);
-        });
-        return () => unsubscribe();
+        const q = query(
+            collection(db, "products"),
+            where("isAvailable", "==", true)
+        );
+
+        const unsub = onSnapshot(
+            q,
+            (snapshot) => {
+                const fetched = snapshot.docs.map((d) => ({
+                    id: d.id,
+                    ...d.data(),
+                }));
+                setProducts(fetched);
+                setLoading(false);
+            },
+            (error) => {
+                console.error("Error fetching products:", error);
+                alert("Could not load products.");
+                setLoading(false);
+            }
+        );
+
+        return () => unsub();
     }, []);
 
-    // --- NEW: Logic to filter products based on search and category ---
+    // Filter
     const filteredProducts = useMemo(() => {
-        return products.filter(product => {
-            const categoryMatch = selectedCategory === 'All' || (product.category && product.category === selectedCategory);
-            const searchMatch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                product.model.toLowerCase().includes(searchTerm.toLowerCase());
+        return products.filter((product) => {
+            const categoryMatch =
+                selectedCategory === "All" ||
+                (product.category && product.category === selectedCategory);
+
+            const searchMatch =
+                product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                product.model.toLowerCase().includes(searchTerm.toLowerCase());
+
             return categoryMatch && searchMatch;
         });
     }, [products, searchTerm, selectedCategory]);
@@ -70,51 +114,64 @@ export default function CustomerStorePage() {
     if (loading) return <Spinner />;
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center gap-4 mb-6">
-                 <ShoppingCart className="h-8 w-8 text-gray-800" />
-                 <h2 className="text-3xl font-bold text-gray-800">Moboflix Store</h2>
-            </div>
-            <p className="text-gray-500 mb-8">Buy genuine parts and accessories. A technician will deliver and install them for you.</p>
+        <div className="min-h-screen w-full bg-slate-950 text-slate-200 py-10 px-5">
+            <div className="container mx-auto px-4">
 
-            {/* --- NEW: Search and Filter UI --- */}
-            <div className="mb-8 space-y-4">
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Input 
-                        type="text"
-                        placeholder="Search by product or model (e.g., iPhone 14 Pro)"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10"
-                    />
+                {/* HEADER */}
+                <div className="flex items-center gap-4 mb-6">
+                    <ShoppingCart className="h-8 w-8 text-slate-300" />
+                    <h2 className="text-3xl font-bold text-white">Moboflix Store</h2>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                    {categories.map(category => (
-                        <Button 
-                            key={category}
-                            variant={selectedCategory === category ? 'default' : 'outline'}
-                            onClick={() => setSelectedCategory(category)}
-                        >
-                            {category}
-                        </Button>
-                    ))}
-                </div>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {/* --- UPDATED: Use filteredProducts array --- */}
-                {filteredProducts.length > 0 ? (
-                    filteredProducts.map(product => (
-                        <ProductCard key={product.id} product={product} />
-                    ))
-                ) : (
-                    <p className="col-span-full text-center text-gray-500 py-10">
-                        No products match your search. Try adjusting your filters.
-                    </p>
-                )}
+                <p className="text-slate-400 mb-8">
+                    Buy genuine parts and accessories. A technician will deliver and install them for you.
+                </p>
+
+                {/* SEARCH + FILTER */}
+                <div className="mb-8 space-y-4">
+                    {/* Search */}
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
+
+                        <Input
+                            type="text"
+                            placeholder="Search by product or model (e.g., iPhone 14 Pro)"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 bg-slate-900 border-slate-700 text-white placeholder-slate-500"
+                        />
+                    </div>
+
+                    {/* Categories */}
+                    <div className="flex flex-wrap gap-2">
+                        {categories.map((cat) => (
+                            <Button
+                                key={cat}
+                                onClick={() => setSelectedCategory(cat)}
+                                className={`px-4 py-1 rounded-lg ${selectedCategory === cat
+                                        ? "bg-blue-600 hover:bg-blue-700 text-white"
+                                        : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
+                                    }`}
+                            >
+                                {cat}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* PRODUCT GRID */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                        ))
+                    ) : (
+                        <p className="col-span-full text-center text-slate-500 py-10">
+                            No products match your search.
+                        </p>
+                    )}
+                </div>
             </div>
         </div>
     );
 }
-

@@ -20,13 +20,13 @@ export default function PaymentPage({ params }) {
     const [job, setJob] = useState(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
-    
+
     const [amount, setAmount] = useState('');
     const [qrValue, setQrValue] = useState('');
     const [submitted, setSubmitted] = useState(false);
-    
+
     // IMPORTANT: Replace this with the technician's actual UPI ID from their profile in Firestore
-    const UPI_ID = '7595854418@ibl'; 
+    const UPI_ID = 'dhir007.devansh-1@okhdfcbank';
 
     useEffect(() => {
         if (!user || !jobId) return;
@@ -119,11 +119,11 @@ export default function PaymentPage({ params }) {
                     <CardFooter className="flex-col space-y-4 bg-slate-50 p-6">
                         <div className="w-full flex items-center bg-white rounded-lg border">
                             <span className="text-xl font-bold text-slate-600 px-4">₹</span>
-                            <Input 
-                                type="number" 
-                                placeholder="Final Amount" 
-                                value={amount} 
-                                onChange={(e) => setAmount(e.target.value)} 
+                            <Input
+                                type="number"
+                                placeholder="Final Amount"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
                                 className="flex-1 text-xl p-3 border-0 focus-visible:ring-0"
                             />
                             <Button onClick={generateQR} className="mr-2">Generate</Button>
@@ -135,11 +135,11 @@ export default function PaymentPage({ params }) {
                 )}
 
                 {isPaymentApproved && (
-                     <CardFooter className="bg-slate-50 p-6">
+                    <CardFooter className="bg-slate-50 p-6">
                         <Button onClick={() => router.push('/dashboard/technician')} className="w-full bg-slate-800 hover:bg-slate-900">
-                           Close Ticket
-                       </Button>
-                   </CardFooter>
+                            Close Ticket
+                        </Button>
+                    </CardFooter>
                 )}
             </Card>
         </div>

@@ -38,7 +38,7 @@ export default function DashboardLayout({ children }) {
 
     if (loading || !user) {
         return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+            <div className="min-h-screen bg-black flex items-center justify-center">
                 <Spinner />
             </div>
         );
@@ -51,31 +51,32 @@ export default function DashboardLayout({ children }) {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-blue-500/30">
+        <div className="min-h-screen bg-black text-zinc-100 selection:bg-yellow-500/30">
             {/* --- HEADER --- */}
-            <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 transition-all duration-300">
+            <header className="bg-black/90 backdrop-blur-md border-b border-white/10 sticky top-0 z-50 transition-all duration-300">
                 <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
 
                         {/* Logo Area */}
                         <div
-                            className="flex-shrink-0 flex items-center gap-2 cursor-pointer"
+                            className="flex-shrink-0 flex items-center gap-2 cursor-pointer group"
                             onClick={() => router.push('/dashboard/customer')}
                             role="button"
                             tabIndex={0}
                             onKeyDown={(e) => { if (e.key === 'Enter') router.push('/dashboard/customer') }}
                         >
-                            <div className="w-8 h-8 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20 overflow-hidden">
+                            {/* LOGO IMAGE FIX */}
+                            <div className="w-8 h-8 relative flex items-center justify-center">
                                 <Image
                                     src="/mobologo.png"
                                     alt="Moboflix"
-                                    width={28}
-                                    height={28}
+                                    width={32}
+                                    height={32}
                                     style={{ objectFit: "contain" }}
                                     priority
                                 />
                             </div>
-                            <h1 className="text-xl font-bold text-white tracking-tight">
+                            <h1 className="text-xl font-bold text-white tracking-tight group-hover:text-yellow-400 transition-colors">
                                 Moboflix
                             </h1>
                         </div>
@@ -83,9 +84,9 @@ export default function DashboardLayout({ children }) {
                         {/* Right Side Actions */}
                         <div className="flex items-center space-x-4">
                             {/* Role Badge */}
-                            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 border border-slate-700 rounded-full">
-                                <UserCircle className="w-4 h-4 text-blue-400" />
-                                <span className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
+                            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full">
+                                <UserCircle className="w-4 h-4 text-yellow-500" />
+                                <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wide">
                                     {getRoleName()} Portal
                                 </span>
                             </div>
@@ -94,7 +95,7 @@ export default function DashboardLayout({ children }) {
                             <Button
                                 onClick={handleLogout}
                                 variant="ghost"
-                                className="text-slate-400 hover:text-white hover:bg-slate-800"
+                                className="text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent hover:border-zinc-800"
                             >
                                 <LogOut className="w-4 h-4 sm:mr-2" />
                                 <span className="hidden sm:inline">
@@ -107,7 +108,6 @@ export default function DashboardLayout({ children }) {
             </header>
 
             {/* --- MAIN CONTENT --- */}
-            {/* IMPORTANT: Padding removed here so the Hero section can touch the edges */}
             <main>
                 {children}
             </main>

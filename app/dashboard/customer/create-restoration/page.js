@@ -8,23 +8,26 @@ import { useRouter } from 'next/navigation';
 import Spinner from '../../../../components/Spinner';
 
 const TechnicianItem = memo(({ item, onSelect, isSelected }) => {
+    // Premium Black & Gold Styling
     const baseClasses =
-        "flex items-center rounded-lg p-4 mb-3 border-2 transition-all cursor-pointer bg-slate-800/60 backdrop-blur";
-    const selectedClasses = "border-blue-500 bg-blue-600/40 text-white shadow-lg";
-    const defaultClasses = "border-slate-700 hover:border-blue-400 hover:bg-slate-800/80";
+        "flex items-center rounded-xl p-4 mb-3 border transition-all cursor-pointer backdrop-blur-md";
+
+    const selectedClasses = "border-yellow-500/50 bg-yellow-900/10 shadow-[0_0_15px_rgba(234,179,8,0.1)]";
+    const defaultClasses = "border-zinc-800 bg-zinc-900/40 hover:border-yellow-500/30 hover:bg-zinc-900/60";
+
     const itemStyle = `${baseClasses} ${isSelected ? selectedClasses : defaultClasses}`;
 
-    const textColor = isSelected ? "text-white" : "text-slate-200";
-    const subTextColor = isSelected ? "text-blue-200" : "text-slate-400";
+    const textColor = isSelected ? "text-white" : "text-zinc-200";
+    const subTextColor = isSelected ? "text-yellow-500" : "text-zinc-500";
 
     return (
         <div onClick={() => onSelect(item)} className={itemStyle}>
-            <div className="text-4xl">👤</div>
+            <div className="text-4xl grayscale brightness-75">👤</div>
             <div className="ml-4 flex-1">
                 <p className={`font-bold ${textColor}`}>{item.displayName || item.email}</p>
                 <p className={`text-sm ${subTextColor}`}>{item.specialty || "General Repairs"}</p>
             </div>
-            {isSelected && <div className="text-2xl text-white">✔️</div>}
+            {isSelected && <div className="text-2xl text-yellow-500">✔️</div>}
         </div>
     );
 });
@@ -116,18 +119,18 @@ export default function CreateRestorationPage() {
     };
 
     return (
-        <div className="min-h-screen w-full bg-slate-950 text-slate-200 py-10 px-5 sm:px-8">
+        <div className="min-h-screen w-full bg-black text-zinc-200 py-10 px-5 sm:px-8 selection:bg-yellow-500/30">
             {/* CENTERED CONTAINER */}
             <div className="max-w-2xl mx-auto">
-                <h2 className="text-3xl font-bold text-white">Book Phone Restoration</h2>
-                <p className="text-slate-400 mb-8">
+                <h2 className="text-3xl font-bold text-white mb-2">Book Phone Restoration</h2>
+                <p className="text-zinc-400 mb-8 border-b border-zinc-800 pb-4">
                     Confirm details to book an immediate restoration service.
                 </p>
 
                 <form onSubmit={handleCreateTicket} className="space-y-8">
                     {/* Device Info */}
                     <div>
-                        <label className="text-lg font-semibold text-slate-300">
+                        <label className="text-lg font-semibold text-zinc-300">
                             1. What device needs restoration?
                         </label>
                         <input
@@ -135,14 +138,14 @@ export default function CreateRestorationPage() {
                             value={deviceInfo}
                             onChange={e => setDeviceInfo(e.target.value)}
                             placeholder="e.g., iPhone X"
-                            className="w-full mt-2 p-4 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-blue-500 outline-none"
+                            className="w-full mt-2 p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 outline-none transition-all"
                             required
                         />
                     </div>
 
                     {/* Issue Description */}
                     <div>
-                        <label className="text-lg font-semibold text-slate-300">
+                        <label className="text-lg font-semibold text-zinc-300">
                             2. Describe the issue
                         </label>
                         <textarea
@@ -150,27 +153,27 @@ export default function CreateRestorationPage() {
                             onChange={e => setIssueDescription(e.target.value)}
                             placeholder="e.g., The screen is cracked after a drop."
                             rows="4"
-                            className="w-full mt-2 p-4 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-blue-500 outline-none"
+                            className="w-full mt-2 p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 outline-none transition-all"
                             required
                         ></textarea>
                     </div>
 
                     {/* Address */}
                     <div>
-                        <label className="text-lg font-semibold text-slate-300">3. Service Address</label>
+                        <label className="text-lg font-semibold text-zinc-300">3. Service Address</label>
                         <input
                             type="text"
                             value={address}
                             onChange={e => setAddress(e.target.value)}
                             placeholder="Enter your full address"
-                            className="w-full mt-2 p-4 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-blue-500 outline-none"
+                            className="w-full mt-2 p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 outline-none transition-all"
                             required
                         />
                         <button
                             type="button"
                             onClick={handleGetCurrentLocation}
                             disabled={isFetchingLocation}
-                            className="mt-3 w-full sm:w-auto bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-all disabled:bg-slate-600"
+                            className="mt-3 w-full sm:w-auto bg-zinc-800 text-yellow-500 border border-zinc-700 font-semibold py-2 px-4 rounded-lg hover:bg-zinc-700 hover:text-yellow-400 transition-all disabled:opacity-50"
                         >
                             {isFetchingLocation ? "Fetching..." : "Use My Current Location"}
                         </button>
@@ -178,7 +181,7 @@ export default function CreateRestorationPage() {
 
                     {/* Contact */}
                     <div>
-                        <label className="text-lg font-semibold text-slate-300">
+                        <label className="text-lg font-semibold text-zinc-300">
                             4. Contact Number (for WhatsApp)
                         </label>
                         <input
@@ -186,14 +189,14 @@ export default function CreateRestorationPage() {
                             value={contactNumber}
                             onChange={e => setContactNumber(e.target.value)}
                             placeholder="e.g., 9876543210"
-                            className="w-full mt-2 p-4 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-blue-500 outline-none"
+                            className="w-full mt-2 p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 outline-none transition-all"
                             required
                         />
                     </div>
 
                     {/* Technician Select */}
                     <div>
-                        <label className="text-lg font-semibold text-slate-300">
+                        <label className="text-lg font-semibold text-zinc-300">
                             5. Choose a Technician
                         </label>
                         <div className="mt-2">
@@ -207,7 +210,7 @@ export default function CreateRestorationPage() {
                                     />
                                 ))
                             ) : (
-                                <p className="text-slate-500">Loading technicians...</p>
+                                <p className="text-zinc-500">Loading technicians...</p>
                             )}
                         </div>
                     </div>
@@ -216,7 +219,7 @@ export default function CreateRestorationPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-600 text-white font-bold py-4 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition-all disabled:bg-slate-600"
+                        className="w-full bg-gradient-to-r from-[#BF953F] to-[#B38728] hover:from-[#d4a849] hover:to-[#c4952d] text-black font-bold py-4 px-6 rounded-xl shadow-lg shadow-yellow-900/20 hover:shadow-yellow-900/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? "Submitting..." : "Book Now"}
                     </button>

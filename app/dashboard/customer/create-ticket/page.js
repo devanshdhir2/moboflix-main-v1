@@ -12,34 +12,34 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Calendar, Smartphone, Wrench, User, AlertCircle, Phone, CheckCircle2, Camera, X } from 'lucide-react';
 
-// --- COMPONENT: Technician Selection Card ---
+// --- COMPONENT: Technician Selection Card (Black & Gold) ---
 const TechnicianItem = memo(({ item, onSelect, isSelected, isBooked }) => {
     let cardStyle = "relative flex items-center p-4 rounded-xl border transition-all cursor-pointer group ";
 
     if (isBooked) {
-        cardStyle += "bg-slate-900/50 border-slate-800 opacity-50 cursor-not-allowed";
+        cardStyle += "bg-zinc-950 border-zinc-900 opacity-40 cursor-not-allowed grayscale";
     } else if (isSelected) {
-        cardStyle += "bg-blue-600/20 border-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)]";
+        cardStyle += "bg-yellow-900/10 border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.2)]";
     } else {
-        cardStyle += "bg-slate-900 border-slate-800 hover:border-blue-500/50 hover:bg-slate-800/80";
+        cardStyle += "bg-zinc-900 border-zinc-800 hover:border-yellow-500/30 hover:bg-zinc-900/80";
     }
 
     return (
         <div onClick={() => !isBooked && onSelect(item)} className={cardStyle}>
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg shadow-inner mr-4 ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg shadow-inner mr-4 ${isSelected ? 'bg-yellow-500 text-black' : 'bg-zinc-800 text-zinc-400'}`}>
                 <User className="w-6 h-6" />
             </div>
 
             <div className="flex-1">
-                <h4 className={`font-bold ${isSelected ? 'text-blue-100' : 'text-slate-200'}`}>
+                <h4 className={`font-bold ${isSelected ? 'text-white' : 'text-zinc-200'}`}>
                     {item.displayName || item.email?.split('@')[0] || "Technician"}
                 </h4>
                 {isBooked ? (
-                    <p className="text-xs font-semibold text-red-400 flex items-center mt-1">
+                    <p className="text-xs font-semibold text-red-500 flex items-center mt-1">
                         <AlertCircle className="w-3 h-3 mr-1" /> Unavailable
                     </p>
                 ) : (
-                    <p className="text-xs text-slate-500 flex items-center mt-1">
+                    <p className="text-xs text-zinc-500 flex items-center mt-1 group-hover:text-zinc-400 transition-colors">
                         <Wrench className="w-3 h-3 mr-1" /> {item.specialty || 'General Repairs'}
                     </p>
                 )}
@@ -47,7 +47,7 @@ const TechnicianItem = memo(({ item, onSelect, isSelected, isBooked }) => {
 
             {isSelected && (
                 <div className="absolute top-4 right-4">
-                    <CheckCircle2 className="w-6 h-6 text-blue-500" />
+                    <CheckCircle2 className="w-6 h-6 text-yellow-500" />
                 </div>
             )}
         </div>
@@ -245,38 +245,38 @@ export default function CreateTicketPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-200 pb-20 selection:bg-blue-500/30">
+        <div className="min-h-screen bg-black text-zinc-200 pb-20 selection:bg-yellow-500/30">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl py-12">
 
                 <div className="mb-10 text-center">
                     <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-3">Book a Repair</h1>
-                    <p className="text-slate-400">Schedule a certified technician to visit your location.</p>
+                    <p className="text-zinc-400">Schedule a certified technician to visit your location.</p>
                 </div>
 
                 <form onSubmit={handleCreateTicket} className="space-y-8">
 
                     {/* 1. Device Info */}
-                    <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+                    <Card className="bg-zinc-900 border-zinc-800 backdrop-blur-sm shadow-xl">
                         <CardContent className="p-6 sm:p-8">
-                            <Label className="text-blue-400 text-xs font-bold uppercase tracking-wider mb-2 block">Step 1</Label>
+                            <Label className="text-yellow-500 text-xs font-bold uppercase tracking-wider mb-2 block">Step 1</Label>
                             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                                <Smartphone className="w-5 h-5 text-slate-400" /> Device Details
+                                <Smartphone className="w-5 h-5 text-zinc-400" /> Device Details
                             </h3>
                             <Input
                                 value={deviceInfo}
                                 onChange={(e) => setDeviceInfo(e.target.value)}
                                 placeholder="e.g., iPhone 13 Pro Max"
-                                className="bg-slate-950 border-slate-800 h-12 text-lg focus:border-blue-500 text-white"
+                                className="bg-zinc-950 border-zinc-800 h-12 text-lg focus:border-yellow-500 text-white placeholder-zinc-600"
                             />
                         </CardContent>
                     </Card>
 
                     {/* 2. Issues */}
-                    <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+                    <Card className="bg-zinc-900 border-zinc-800 backdrop-blur-sm shadow-xl">
                         <CardContent className="p-6 sm:p-8">
-                            <Label className="text-blue-400 text-xs font-bold uppercase tracking-wider mb-2 block">Step 2</Label>
+                            <Label className="text-yellow-500 text-xs font-bold uppercase tracking-wider mb-2 block">Step 2</Label>
                             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                                <AlertCircle className="w-5 h-5 text-slate-400" /> Issues
+                                <AlertCircle className="w-5 h-5 text-zinc-400" /> Issues
                             </h3>
 
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
@@ -285,12 +285,12 @@ export default function CreateTicketPage() {
                                     return (
                                         <div key={issueName} className="relative">
                                             <button type="button" onClick={() => handleIssueToggle(issueName)}
-                                                className={`w-full py-3 px-4 rounded-lg font-semibold text-sm border transition-all ${isSelected ? 'bg-blue-600 text-white border-blue-500 shadow-lg' : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-600'}`}>
+                                                className={`w-full py-3 px-4 rounded-xl font-semibold text-sm border transition-all ${isSelected ? 'bg-gradient-to-br from-[#BF953F] to-[#B38728] text-black border-yellow-600 shadow-lg' : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:border-zinc-600 hover:text-white'}`}>
                                                 {issueName}
                                             </button>
                                             {isSelected && (
                                                 <select value={selectedIssues[issueName]} onChange={(e) => handleSubOptionSelect(issueName, e.target.value)}
-                                                    className="w-full mt-2 p-2 bg-slate-800 text-white text-xs rounded border border-slate-700">
+                                                    className="w-full mt-2 p-2 bg-zinc-800 text-white text-xs rounded-lg border border-zinc-700 outline-none focus:border-yellow-500">
                                                     <option value="" disabled>Select Quality...</option>
                                                     {issueTypes[issueName].map(opt => <option key={opt} value={opt}>{opt}</option>)}
                                                 </select>
@@ -303,19 +303,19 @@ export default function CreateTicketPage() {
                                 value={customIssue}
                                 onChange={(e) => setCustomIssue(e.target.value)}
                                 placeholder="Other Issue (Optional)"
-                                className="bg-slate-950 border-slate-800 text-white"
+                                className="bg-zinc-950 border-zinc-800 text-white placeholder-zinc-600 focus:border-yellow-500"
                             />
                         </CardContent>
                     </Card>
 
-                    {/* 3. Image Upload (NEW) */}
-                    <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+                    {/* 3. Image Upload */}
+                    <Card className="bg-zinc-900 border-zinc-800 backdrop-blur-sm shadow-xl">
                         <CardContent className="p-6 sm:p-8">
-                            <Label className="text-blue-400 text-xs font-bold uppercase tracking-wider mb-2 block">Step 3</Label>
+                            <Label className="text-yellow-500 text-xs font-bold uppercase tracking-wider mb-2 block">Step 3</Label>
                             <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                                <Camera className="w-5 h-5 text-slate-400" /> Upload Photo (Optional)
+                                <Camera className="w-5 h-5 text-zinc-400" /> Upload Photo (Optional)
                             </h3>
-                            <p className="text-slate-500 text-sm mb-4">Upload a clear photo of the damage to help us verify parts.</p>
+                            <p className="text-zinc-500 text-sm mb-4">Upload a clear photo of the damage to help us verify parts.</p>
 
                             <div className="flex items-center gap-4">
                                 <div className="relative">
@@ -326,17 +326,17 @@ export default function CreateTicketPage() {
                                         className="hidden"
                                         id="image-upload"
                                     />
-                                    <Label htmlFor="image-upload" className="cursor-pointer flex items-center justify-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg border border-slate-700 transition-colors">
+                                    <Label htmlFor="image-upload" className="cursor-pointer flex items-center justify-center px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg border border-zinc-700 transition-colors">
                                         <Camera className="w-4 h-4 mr-2" /> Choose Photo
                                     </Label>
                                 </div>
                                 {imagePreview && (
                                     <div className="relative group">
-                                        <img src={imagePreview} alt="Damage Preview" className="h-16 w-16 object-cover rounded-lg border border-slate-700" />
+                                        <img src={imagePreview} alt="Damage Preview" className="h-16 w-16 object-cover rounded-lg border border-zinc-700" />
                                         <button
                                             type="button"
                                             onClick={removeImage}
-                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 shadow-md"
+                                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5 hover:bg-red-700 shadow-md"
                                         >
                                             <X className="w-3 h-3" />
                                         </button>
@@ -347,11 +347,11 @@ export default function CreateTicketPage() {
                     </Card>
 
                     {/* 4. Location & Contact */}
-                    <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+                    <Card className="bg-zinc-900 border-zinc-800 backdrop-blur-sm shadow-xl">
                         <CardContent className="p-6 sm:p-8 space-y-6">
-                            <Label className="text-blue-400 text-xs font-bold uppercase tracking-wider mb-2 block">Step 4</Label>
+                            <Label className="text-yellow-500 text-xs font-bold uppercase tracking-wider mb-2 block">Step 4</Label>
                             <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                                <MapPin className="w-5 h-5 text-slate-400" /> Location & Contact
+                                <MapPin className="w-5 h-5 text-zinc-400" /> Location & Contact
                             </h3>
                             <div className="space-y-4">
                                 <div className="flex gap-2">
@@ -359,20 +359,20 @@ export default function CreateTicketPage() {
                                         value={address}
                                         onChange={(e) => setAddress(e.target.value)}
                                         placeholder="Repair Address"
-                                        className="bg-slate-950 border-slate-800 h-11 flex-1 text-white"
+                                        className="bg-zinc-950 border-zinc-800 h-11 flex-1 text-white placeholder-zinc-600 focus:border-yellow-500"
                                     />
-                                    <Button type="button" onClick={handleGetCurrentLocation} variant="outline" className="border-slate-800 text-blue-400">
+                                    <Button type="button" onClick={handleGetCurrentLocation} variant="outline" className="border-zinc-700 text-yellow-500 hover:bg-zinc-800 hover:text-yellow-400">
                                         <MapPin className="w-4 h-4" />
                                     </Button>
                                 </div>
                                 <div className="relative">
-                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                                     <Input
                                         type="tel"
                                         value={contactNumber}
                                         onChange={(e) => setContactNumber(e.target.value)}
                                         placeholder="Phone Number"
-                                        className="bg-slate-950 border-slate-800 pl-10 h-11 text-white"
+                                        className="bg-zinc-950 border-zinc-800 pl-10 h-11 text-white placeholder-zinc-600 focus:border-yellow-500"
                                     />
                                 </div>
                             </div>
@@ -380,31 +380,31 @@ export default function CreateTicketPage() {
                     </Card>
 
                     {/* 5. Scheduling & Expert */}
-                    <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+                    <Card className="bg-zinc-900 border-zinc-800 backdrop-blur-sm shadow-xl">
                         <CardContent className="p-6 sm:p-8">
-                            <Label className="text-blue-400 text-xs font-bold uppercase tracking-wider mb-2 block">Step 5</Label>
+                            <Label className="text-yellow-500 text-xs font-bold uppercase tracking-wider mb-2 block">Step 5</Label>
                             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                                <Calendar className="w-5 h-5 text-slate-400" /> Schedule
+                                <Calendar className="w-5 h-5 text-zinc-400" /> Schedule
                             </h3>
-                            {/* --- FIXED: Added text-white and [color-scheme:dark] to ensure visibility --- */}
+                            {/* --- FIXED: Added text-white and [color-scheme:dark] --- */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                                 <Input
                                     type="date"
                                     value={date}
                                     onChange={(e) => setDate(e.target.value)}
-                                    className="bg-slate-950 border-slate-800 h-12 text-center text-white [color-scheme:dark]"
+                                    className="bg-zinc-950 border-zinc-800 h-12 text-center text-white [color-scheme:dark] focus:border-yellow-500"
                                 />
                                 <Input
                                     type="time"
                                     value={time}
                                     onChange={(e) => setTime(e.target.value)}
-                                    className="bg-slate-950 border-slate-800 h-12 text-center text-white [color-scheme:dark]"
+                                    className="bg-zinc-950 border-zinc-800 h-12 text-center text-white [color-scheme:dark] focus:border-yellow-500"
                                 />
                             </div>
 
-                            <Label className="text-blue-400 text-xs font-bold uppercase tracking-wider mb-2 block">Step 6</Label>
+                            <Label className="text-yellow-500 text-xs font-bold uppercase tracking-wider mb-2 block">Step 6</Label>
                             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                                <User className="w-5 h-5 text-slate-400" /> Choose Expert
+                                <User className="w-5 h-5 text-zinc-400" /> Choose Expert
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {technicians.map(tech => (
@@ -415,7 +415,7 @@ export default function CreateTicketPage() {
                     </Card>
 
                     <div className="pt-4">
-                        <Button type="submit" disabled={loading} className="w-full h-14 text-lg font-bold bg-blue-600 hover:bg-blue-700 shadow-xl rounded-xl">
+                        <Button type="submit" disabled={loading} className="w-full h-14 text-lg font-bold bg-gradient-to-r from-[#BF953F] to-[#B38728] hover:from-[#d4a849] hover:to-[#c4952d] text-black shadow-lg rounded-xl">
                             {loading ? <Spinner /> : 'Confirm Booking'}
                         </Button>
                     </div>

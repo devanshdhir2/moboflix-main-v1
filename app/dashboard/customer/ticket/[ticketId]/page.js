@@ -14,8 +14,8 @@ import LiveLocationMap from '../../../../../components/LiveLocationMap';
 
 const DetailRow = ({ label, value }) => (
     <div>
-        <p className="text-sm font-medium text-slate-500">{label}</p>
-        <p className="mt-1 text-md text-slate-900">{value}</p>
+        <p className="text-sm font-medium text-zinc-500 uppercase tracking-wide">{label}</p>
+        <p className="mt-1 text-md text-zinc-100 font-medium">{value}</p>
     </div>
 );
 
@@ -29,7 +29,6 @@ export default function TicketDetailPage() {
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
 
-    // This useEffect for fetching the ticket is now simplified
     useEffect(() => {
         if (!ticketId) return;
         const ticketRef = doc(db, 'tickets', ticketId);
@@ -47,8 +46,6 @@ export default function TicketDetailPage() {
         });
         return () => unsubscribe();
     }, [ticketId, router]);
-
-    const getStatusVariant = (status) => { /* ... remains unchanged ... */ };
 
     const handleStartRepair = () => {
         if (!confirm("Confirm that the technician has arrived and is starting the repair?")) return;
@@ -68,80 +65,76 @@ export default function TicketDetailPage() {
         }
     };
 
-    if (loading) return <Spinner />;
-    if (!ticket) return <div className="p-8 text-center">Ticket not found.</div>;
+    if (loading) return <div className="min-h-screen bg-black flex items-center justify-center"><Spinner /></div>;
+    if (!ticket) return <div className="p-8 text-center bg-black text-white min-h-screen">Ticket not found.</div>;
 
-    // --- UPDATED: Logic to determine if the current user can interact ---
-    // A user can interact if they are the original customer who created the ticket.
     const canInteract = user && user.uid === ticket.customerId;
-    // A special case: the ticket belongs to a guest, but the current user is a *different* guest.
     const isViewingSomeoneElsesGuestTicket = ticket.isGuestTicket && !canInteract;
 
     const appointmentDate = ticket.appointmentDate?.toDate ? ticket.appointmentDate.toDate() : new Date(ticket.appointmentDate);
     const chatEnabledStatuses = ['In Progress', 'Work Started', 'Pending Payment', 'Completed'];
 
     return (
-        <div className="container mx-auto max-w-4xl px-4 py-8 space-y-8">
-            {ticket.status === 'In Progress' && (
-                <Card>
-                    <CardHeader><CardTitle>Technician Live Location</CardTitle></CardHeader>
-                    <CardContent><LiveLocationMap technicianLocation={ticket.technicianLocation} /></CardContent>
-                </Card>
-            )}
-
-            <Card>
-                <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <CardTitle className="text-2xl md:text-3xl">{ticket.deviceInfo}</CardTitle>
-                        <span className={`px-3 py-1 text-sm font-semibold rounded-full`}>
-                            {ticket.status}
-                        </span>
-                    </div>
-                    <CardDescription>{ticket.issueDescription}</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6">
-                    <DetailRow label="Technician" value={ticket.technicianName || 'Awaiting Assignment'} />
-                    <DetailRow label="Scheduled For" value={appointmentDate.toLocaleString()} />
-                    <DetailRow label="Service Address" value={ticket.address} />
-                    {ticket.issueType && <DetailRow label="Diagnosed Issue" value={ticket.issueType} />}
-                </CardContent>
-
-                {/* --- UPDATED: Conditionally render the footer based on status and user --- */}
-                {(ticket.status === 'In Progress' || (ticket.status === 'Completed' && !ticket.isReviewed)) && (
-                    <CardFooter className="bg-slate-50 p-6">
-                        {ticket.status === 'In Progress' && (
-                            // Disable the start button if the current user is not the original customer
-                            <Button
-                                onClick={handleStartRepair}
-                                disabled={actionLoading || !canInteract}
-                                className="w-full bg-green-600 hover:bg-green-700"
-                                title={!canInteract ? "Only the user who created this ticket can start the repair." : ""}
-                            >
-                                {actionLoading ? 'Confirming...' : 'Confirm Repair Start'}
-                            </Button>
-                        )}
-                        {ticket.status === 'Completed' && !ticket.isReviewed && (
-                            <Link href={`/dashboard/customer/review/${ticket.id}`} passHref className="w-full">
-                                <Button className="w-full bg-yellow-500 hover:bg-yellow-600" disabled={!canInteract}>
-                                    Leave a Review
-                                </Button>
-                            </Link>
-                        )}
-                    </CardFooter>
+        <div className="min-h-screen w-full bg-black text-zinc-200 pb-20 selection:bg-yellow-500/30">
+            <div className="container mx-auto max-w-4xl px-4 py-8 space-y-8">
+                {ticket.status === 'In Progress' && (
+                    <Card className="bg-zinc-900 border border-zinc-800">
+                        <CardHeader><CardTitle className="text-white">Technician Live Location</CardTitle></CardHeader>
+                        <CardContent><LiveLocationMap technicianLocation={ticket.technicianLocation} /></CardContent>
+                    </Card>
                 )}
-            </Card>
 
-            {isViewingSomeoneElsesGuestTicket && (
-                <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md text-center">
-                    <p className="font-bold">This ticket was created by a different guest session.</p>
-                    <p className="text-sm">You can view the details, but you cannot perform actions like starting the repair.</p>
-                </div>
-            )}
+                <Card className="bg-zinc-900 border border-zinc-800 shadow-xl overflow-hidden">
+                    <CardHeader className="bg-zinc-950/50 border-b border-zinc-800">
+                        <div className="flex justify-between items-center">
+                            <CardTitle className="text-2xl md:text-3xl text-white">{ticket.deviceInfo}</CardTitle>
+                            <span className={`px-4 py-1.5 text-sm font-bold rounded-full bg-zinc-800 text-yellow-500 border border-yellow-600/30`}>
+                                {ticket.status}
+                            </span>
+                        </div>
+                        <CardDescription className="text-zinc-400 mt-2">{ticket.issueDescription}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+                        <DetailRow label="Technician" value={ticket.technicianName || 'Awaiting Assignment'} />
+                        <DetailRow label="Scheduled For" value={appointmentDate.toLocaleString()} />
+                        <DetailRow label="Service Address" value={ticket.address} />
+                        {ticket.issueType && <DetailRow label="Diagnosed Issue" value={ticket.issueType} />}
+                    </CardContent>
 
-            {chatEnabledStatuses.includes(ticket.status) && (
-                <ChatComponent ticketId={ticket.id} />
-            )}
+                    {(ticket.status === 'In Progress' || (ticket.status === 'Completed' && !ticket.isReviewed)) && (
+                        <CardFooter className="bg-zinc-950 p-6 border-t border-zinc-800">
+                            {ticket.status === 'In Progress' && (
+                                <Button
+                                    onClick={handleStartRepair}
+                                    disabled={actionLoading || !canInteract}
+                                    className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white font-bold"
+                                    title={!canInteract ? "Only the user who created this ticket can start the repair." : ""}
+                                >
+                                    {actionLoading ? 'Confirming...' : 'Confirm Repair Start'}
+                                </Button>
+                            )}
+                            {ticket.status === 'Completed' && !ticket.isReviewed && (
+                                <Link href={`/dashboard/customer/review/${ticket.id}`} passHref className="w-full">
+                                    <Button className="w-full bg-gradient-to-r from-[#BF953F] to-[#B38728] hover:from-[#d4a849] hover:to-[#c4952d] text-black font-bold" disabled={!canInteract}>
+                                        Leave a Review
+                                    </Button>
+                                </Link>
+                            )}
+                        </CardFooter>
+                    )}
+                </Card>
+
+                {isViewingSomeoneElsesGuestTicket && (
+                    <div className="bg-yellow-900/20 border-l-4 border-yellow-500 text-yellow-200 p-4 rounded-md text-center">
+                        <p className="font-bold">This ticket was created by a different guest session.</p>
+                        <p className="text-sm text-yellow-200/70">You can view the details, but you cannot perform actions like starting the repair.</p>
+                    </div>
+                )}
+
+                {chatEnabledStatuses.includes(ticket.status) && (
+                    <ChatComponent ticketId={ticket.id} />
+                )}
+            </div>
         </div>
     );
 }
-

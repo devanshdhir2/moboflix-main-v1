@@ -18,7 +18,7 @@ const StarRating = ({ rating, setRating }) => {
                     className="text-5xl transition-transform transform hover:scale-125 focus:outline-none"
                     aria-label={`${star} star`}
                 >
-                    <span className={star <= rating ? "text-yellow-400" : "text-slate-600"}>
+                    <span className={star <= rating ? "text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]" : "text-zinc-700"}>
                         ★
                     </span>
                 </button>
@@ -86,17 +86,17 @@ export default function LeaveReviewPage({ params }) {
         }
     };
 
-    if (loading) return <Spinner />;
-    if (!ticket) return <div className="p-8 text-center">Ticket not found.</div>;
+    if (loading) return <div className="min-h-screen bg-black flex items-center justify-center"><Spinner /></div>;
+    if (!ticket) return <div className="p-8 text-center bg-black text-white min-h-screen">Ticket not found.</div>;
 
     if (ticket.status !== "Completed" || ticket.isReviewed) {
         return (
-            <div className="min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center p-8">
+            <div className="min-h-screen bg-black text-zinc-200 flex items-center justify-center p-8">
                 <div className="max-w-xl w-full text-center">
                     <p className="text-lg">This ticket cannot be reviewed at this time.</p>
                     <button
                         onClick={() => router.back()}
-                        className="mt-4 inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+                        className="mt-4 inline-block bg-zinc-800 text-white font-semibold py-2 px-4 rounded-lg hover:bg-zinc-700 transition border border-zinc-700"
                     >
                         Go Back
                     </button>
@@ -106,23 +106,23 @@ export default function LeaveReviewPage({ params }) {
     }
 
     return (
-        <div className="min-h-screen w-full bg-slate-950 text-slate-200 py-10 px-5 sm:px-8">
-            <div className="max-w-2xl mx-auto bg-slate-900/70 border border-slate-800 rounded-lg shadow-lg p-8">
+        <div className="min-h-screen w-full bg-black text-zinc-200 py-10 px-5 sm:px-8 selection:bg-yellow-500/30">
+            <div className="max-w-2xl mx-auto bg-zinc-900 border border-zinc-800 rounded-2xl shadow-xl p-8 backdrop-blur-md">
                 <h2 className="text-3xl font-bold text-white text-center">Leave a Review</h2>
-                <p className="text-slate-400 mb-8 text-center">
-                    How was your experience with {ticket.technicianName}?
+                <p className="text-zinc-400 mb-8 text-center">
+                    How was your experience with <span className="text-yellow-500 font-semibold">{ticket.technicianName}</span>?
                 </p>
 
                 <form onSubmit={handleSubmitReview} className="space-y-8">
                     <div>
-                        <label className="text-lg font-semibold text-slate-300 block text-center mb-4">
+                        <label className="text-lg font-semibold text-zinc-300 block text-center mb-4">
                             Your Rating
                         </label>
                         <StarRating rating={rating} setRating={setRating} />
                     </div>
 
                     <div>
-                        <label htmlFor="review" className="text-lg font-semibold text-slate-300">
+                        <label htmlFor="review" className="text-lg font-semibold text-zinc-300">
                             Your Review (Optional)
                         </label>
                         <textarea
@@ -131,14 +131,14 @@ export default function LeaveReviewPage({ params }) {
                             onChange={(e) => setReview(e.target.value)}
                             placeholder="Describe your experience..."
                             rows="5"
-                            className="w-full mt-2 p-4 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:border-blue-500 focus:ring-0 outline-none"
+                            className="w-full mt-2 p-4 bg-zinc-950 border border-zinc-800 rounded-xl text-zinc-100 placeholder-zinc-600 focus:border-yellow-500 focus:ring-0 outline-none transition-all"
                         ></textarea>
                     </div>
 
                     <button
                         type="submit"
                         disabled={actionLoading}
-                        className="w-full bg-blue-600 text-white font-bold py-4 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition-all disabled:bg-slate-600"
+                        className="w-full bg-gradient-to-r from-[#BF953F] to-[#B38728] hover:from-[#d4a849] hover:to-[#c4952d] text-black font-bold py-4 px-6 rounded-xl shadow-lg transition-all disabled:opacity-50"
                     >
                         {actionLoading ? "Submitting..." : "Submit Review"}
                     </button>

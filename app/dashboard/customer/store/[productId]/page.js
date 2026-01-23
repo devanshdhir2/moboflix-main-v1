@@ -27,22 +27,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// Technician list item - DARK THEME
+// Technician list item - BLACK/GOLD THEME
 const TechnicianSelectItem = ({ tech, onSelect, isSelected }) => (
     <div
         onClick={() => onSelect(tech)}
-        className={`flex items-center p-4 rounded-lg cursor-pointer transition-all border
+        className={`flex items-center p-4 rounded-xl cursor-pointer transition-all border
         ${isSelected
-                ? "bg-blue-600/30 border-blue-500 shadow-md"
-                : "bg-slate-900/70 border-slate-700 hover:bg-slate-800"
+                ? "bg-yellow-900/10 border-yellow-500/50 shadow-[0_0_10px_rgba(234,179,8,0.2)]"
+                : "bg-zinc-900/70 border-zinc-800 hover:bg-zinc-800 hover:border-zinc-700"
             }`}
     >
-        <div className="text-3xl">👤</div>
+        <div className="text-3xl grayscale brightness-75">👤</div>
         <div className="ml-4">
-            <p className="font-semibold text-slate-200">
+            <p className={`font-semibold ${isSelected ? 'text-white' : 'text-zinc-200'}`}>
                 {tech.displayName || tech.email}
             </p>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-zinc-400">
                 {tech.specialty || "General Repairs & Installation"}
             </p>
         </div>
@@ -140,32 +140,32 @@ export default function ProductOrderPage() {
         }
     };
 
-    if (loading) return <Spinner />;
-    if (!product) return <p className="text-center text-slate-300">Product not found.</p>;
+    if (loading) return <div className="min-h-screen bg-black flex items-center justify-center"><Spinner /></div>;
+    if (!product) return <div className="min-h-screen bg-black flex items-center justify-center"><p className="text-zinc-300">Product not found.</p></div>;
 
     return (
-        <div className="min-h-screen w-full bg-slate-950 text-slate-200 py-10 px-5 lg:px-10">
+        <div className="min-h-screen w-full bg-black text-zinc-200 py-10 px-5 lg:px-10 selection:bg-yellow-500/30">
             <div className="max-w-4xl mx-auto">
-                <Card className="bg-slate-900/70 border border-slate-800 shadow-xl">
+                <Card className="bg-zinc-900 border border-zinc-800 shadow-xl rounded-2xl">
                     <CardHeader>
                         <CardTitle className="text-3xl text-white">Place Your Order</CardTitle>
-                        <CardDescription className="text-slate-400">
-                            Confirm details for your purchase of the {product.name}.
+                        <CardDescription className="text-zinc-400">
+                            Confirm details for your purchase of the <span className="text-yellow-500 font-semibold">{product.name}</span>.
                         </CardDescription>
                     </CardHeader>
 
                     <CardContent>
                         {/* PRODUCT INFO */}
-                        <div className="flex items-center gap-6 p-4 bg-slate-900/70 border border-slate-800 rounded-lg mb-6">
+                        <div className="flex items-center gap-6 p-4 bg-zinc-950 border border-zinc-800 rounded-xl mb-6">
                             <img
                                 src={product.imageUrl}
                                 alt={product.name}
-                                className="w-28 h-28 object-cover rounded-lg"
+                                className="w-28 h-28 object-cover rounded-lg border border-zinc-800"
                             />
                             <div>
                                 <h3 className="text-xl font-bold text-white">{product.name}</h3>
-                                <p className="text-slate-400">For {product.model}</p>
-                                <p className="text-2xl font-bold text-green-400 mt-2">
+                                <p className="text-zinc-400">For {product.model}</p>
+                                <p className="text-2xl font-bold text-yellow-400 mt-2">
                                     ₹{product.price}
                                 </p>
                             </div>
@@ -174,13 +174,13 @@ export default function ProductOrderPage() {
                         {/* FORM */}
                         <form onSubmit={handlePlaceOrder} className="space-y-6">
                             <div>
-                                <h4 className="font-bold text-lg mb-2 text-white">
+                                <h4 className="font-bold text-lg mb-2 text-white border-b border-zinc-800 pb-2">
                                     1. Delivery & Installation Details
                                 </h4>
 
-                                <div className="space-y-4">
+                                <div className="space-y-4 pt-2">
                                     <div className="space-y-2">
-                                        <Label htmlFor="address" className="text-slate-300">
+                                        <Label htmlFor="address" className="text-zinc-300">
                                             Full Address
                                         </Label>
                                         <Input
@@ -188,13 +188,13 @@ export default function ProductOrderPage() {
                                             value={address}
                                             onChange={(e) => setAddress(e.target.value)}
                                             placeholder="e.g., 123 Moboflix St, Tech City"
-                                            className="bg-slate-900 border-slate-700 text-white placeholder-slate-500"
+                                            className="bg-zinc-950 border-zinc-700 text-white placeholder-zinc-500 focus:border-yellow-500"
                                             required
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="contactNumber" className="text-slate-300">
+                                        <Label htmlFor="contactNumber" className="text-zinc-300">
                                             Contact Number
                                         </Label>
                                         <Input
@@ -203,13 +203,13 @@ export default function ProductOrderPage() {
                                             value={contactNumber}
                                             onChange={(e) => setContactNumber(e.target.value)}
                                             placeholder="e.g., 9876543210"
-                                            className="bg-slate-900 border-slate-700 text-white placeholder-slate-500"
+                                            className="bg-zinc-950 border-zinc-700 text-white placeholder-zinc-500 focus:border-yellow-500"
                                             required
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="appointmentDate" className="text-slate-300">
+                                        <Label htmlFor="appointmentDate" className="text-zinc-300">
                                             Preferred Date & Time
                                         </Label>
                                         <Input
@@ -217,7 +217,7 @@ export default function ProductOrderPage() {
                                             type="datetime-local"
                                             value={appointmentDate}
                                             onChange={(e) => setAppointmentDate(e.target.value)}
-                                            className="bg-slate-900 border-slate-700 text-white"
+                                            className="bg-zinc-950 border-zinc-700 text-white focus:border-yellow-500 [color-scheme:dark]"
                                             required
                                         />
                                     </div>
@@ -226,10 +226,10 @@ export default function ProductOrderPage() {
 
                             {/* TECHNICIAN LIST */}
                             <div>
-                                <h4 className="font-bold text-lg mb-2 text-white">
+                                <h4 className="font-bold text-lg mb-2 text-white border-b border-zinc-800 pb-2">
                                     2. Choose Your Technician
                                 </h4>
-                                <div className="space-y-3">
+                                <div className="space-y-3 pt-2">
                                     {technicians.map((tech) => (
                                         <TechnicianSelectItem
                                             key={tech.id}
@@ -245,7 +245,7 @@ export default function ProductOrderPage() {
                             <Button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700 text-white"
+                                className="w-full h-12 text-lg bg-gradient-to-r from-[#BF953F] to-[#B38728] hover:from-[#d4a849] hover:to-[#c4952d] text-black font-bold shadow-lg"
                             >
                                 {isSubmitting ? <Spinner /> : `Confirm Order (₹${product.price})`}
                             </Button>

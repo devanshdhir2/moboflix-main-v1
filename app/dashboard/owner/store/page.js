@@ -101,6 +101,7 @@ export default function StoreManagementPage() {
         "Battery",
         "Mobile Frame",
         "Charging Circuit",
+        "Accessories",
     ];
 
     const formCategories = categories.filter((c) => c !== "All");

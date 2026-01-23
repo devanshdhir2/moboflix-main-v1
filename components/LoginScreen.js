@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Image from "next/image";
 import { useRouter } from 'next/navigation';
 import { auth, db } from '../firebase/config';
 import {
@@ -224,8 +225,15 @@ export default function LoginScreen() {
 
                 <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-8">
-                        <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-violet-500 rounded-lg flex items-center justify-center shadow-2xl text-white">
-                            <span className="font-bold text-2xl">M</span>
+                        <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-violet-500 rounded-lg flex items-center justify-center shadow-2xl text-white overflow-hidden">
+                            <Image
+                                src="/mobologo.png"
+                                alt="Moboflix"
+                                width={44}
+                                height={44}
+                                style={{ objectFit: "contain" }}
+                                priority
+                            />
                         </div>
                         <h1 className="text-2xl font-bold tracking-tight text-white">Moboflix</h1>
                     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from 'react';
+import Image from "next/image";
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { auth } from '../../firebase/config';
@@ -57,9 +58,22 @@ export default function DashboardLayout({ children }) {
                     <div className="flex items-center justify-between h-16">
 
                         {/* Logo Area */}
-                        <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer" onClick={() => router.push('/dashboard/customer')}>
-                            <div className="w-8 h-8 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
-                                <span className="font-bold text-white text-lg">M</span>
+                        <div
+                            className="flex-shrink-0 flex items-center gap-2 cursor-pointer"
+                            onClick={() => router.push('/dashboard/customer')}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => { if (e.key === 'Enter') router.push('/dashboard/customer') }}
+                        >
+                            <div className="w-8 h-8 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20 overflow-hidden">
+                                <Image
+                                    src="/mobologo.png"
+                                    alt="Moboflix"
+                                    width={28}
+                                    height={28}
+                                    style={{ objectFit: "contain" }}
+                                    priority
+                                />
                             </div>
                             <h1 className="text-xl font-bold text-white tracking-tight">
                                 Moboflix

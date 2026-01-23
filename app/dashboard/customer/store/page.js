@@ -67,6 +67,7 @@ export default function CustomerStorePage() {
         "Battery",
         "Mobile Frame",
         "Charging Circuit",
+        "Accessories",
     ];
 
     // Fetch products
@@ -149,8 +150,8 @@ export default function CustomerStorePage() {
                                 key={cat}
                                 onClick={() => setSelectedCategory(cat)}
                                 className={`px-4 py-1 rounded-lg ${selectedCategory === cat
-                                        ? "bg-blue-600 hover:bg-blue-700 text-white"
-                                        : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
+                                    ? "bg-blue-600 hover:bg-blue-700 text-white"
+                                    : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
                                     }`}
                             >
                                 {cat}

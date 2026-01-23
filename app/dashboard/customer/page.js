@@ -181,8 +181,8 @@ export default function CustomerDashboard() {
                                 <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-amber-500 group-hover:text-white transition-all duration-300 text-amber-500">
                                     <ShoppingCart className="w-8 h-8" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-2">Accessories</h3>
-                                <p className="text-slate-400 text-sm">Premium parts & add-ons.</p>
+                                <h3 className="text-xl font-bold text-white mb-2">Spare Parts & Accessories</h3>
+                                <p className="text-slate-400 text-sm">Buy Premium parts & Accessories for your device.</p>
                             </CardContent>
                         </Card>
                     </Link>

@@ -32,20 +32,20 @@ const CountdownTimer = ({ appointmentDate }) => {
         return () => clearInterval(timer);
     }, [appointmentDate]);
     return (
-        <div className="bg-slate-100 rounded-lg p-4 mb-6 text-center">
-            <p className="text-sm text-slate-500 mb-1">Time until appointment</p>
-            <p className="text-2xl font-bold text-slate-800">{timeLeft}</p>
+        <div className="bg-zinc-900 rounded-lg p-4 mb-6 text-center">
+            <p className="text-sm text-zinc-500 mb-1">Time until appointment</p>
+            <p className="text-2xl font-bold text-zinc-200">{timeLeft}</p>
         </div>
     );
 };
 
 const DetailRow = ({ label, value, icon, isLink = false }) => (
     <div>
-        <p className="text-sm font-medium text-slate-500 flex items-center">{icon} <span className="ml-2">{label}</span></p>
+        <p className="text-sm font-medium text-zinc-500 flex items-center">{icon} <span className="ml-2">{label}</span></p>
         {isLink ? (
-             <a href={value} className="mt-1 text-md text-blue-600 underline hover:text-blue-800">{value.replace('tel:', '')}</a>
+             <a href={value} className="mt-1 text-md text-yellow-500 underline hover:text-yellow-300">{value.replace('tel:', '')}</a>
         ) : (
-            <p className="mt-1 text-md text-slate-900">{value}</p>
+            <p className="mt-1 text-md text-zinc-100">{value}</p>
         )}
     </div>
 );
@@ -151,8 +151,8 @@ export default function TechnicianJobDetailPage() {
                             <p className="font-bold">Guest User - Awaiting Start</p>
                             <p className="text-sm">The user may be offline. Contact them on WhatsApp to coordinate. The owner can manually start the {actionText} if needed.</p>
                         </div>
-                        <Button onClick={handleWhatsAppContact} className="w-full bg-green-500 hover:bg-green-600 flex items-center gap-2"><MessageSquare className="h-5 w-5" /> Contact on WhatsApp</Button>
-                        <Button onClick={() => handleNavigate(job.address)} className="w-full bg-purple-600 hover:bg-purple-700">Navigate to Address</Button>
+                        <Button onClick={handleWhatsAppContact} className="w-full bg-yellow-500 hover:bg-yellow-500 flex items-center gap-2"><MessageSquare className="h-5 w-5" /> Contact on WhatsApp</Button>
+                        <Button onClick={() => handleNavigate(job.address)} className="w-full bg-zinc-800 hover:bg-zinc-700">Navigate to Address</Button>
                     </div>
                 );
             }
@@ -163,7 +163,7 @@ export default function TechnicianJobDetailPage() {
                             <p className="font-bold">Guest {isProductOrder ? 'Delivery' : 'Repair'} In Progress</p>
                             <p className="text-sm">Work has been started. You may now proceed.</p>
                         </div>
-                        <Button onClick={handleWhatsAppContact} className="w-full bg-green-500 hover:bg-green-600 flex items-center gap-2"><MessageSquare className="h-5 w-5" /> Contact on WhatsApp</Button>
+                        <Button onClick={handleWhatsAppContact} className="w-full bg-yellow-500 hover:bg-yellow-500 flex items-center gap-2"><MessageSquare className="h-5 w-5" /> Contact on WhatsApp</Button>
                         <Link href={`/dashboard/technician/payment/${job.id}`} passHref><Button className="w-full">Proceed to Payment</Button></Link>
                     </div>
                 );
@@ -171,27 +171,27 @@ export default function TechnicianJobDetailPage() {
         }
         
         if (job.status === 'Pending') {
-            return <Button onClick={handleAcceptJob} disabled={actionLoading} className="w-full bg-green-600 hover:bg-green-700">Accept This Job</Button>;
+            return <Button onClick={handleAcceptJob} disabled={actionLoading} className="w-full bg-yellow-500 hover:bg-yellow-400">Accept This Job</Button>;
         }
         if (job.status === 'In Progress') {
             return (
                 <div className="text-center space-y-4">
-                    <p className="text-slate-600 font-semibold animate-pulse">Waiting for customer to confirm start...</p>
-                    <Button onClick={() => handleNavigate(job.address)} className="w-full bg-purple-600 hover:bg-purple-700">Navigate to Address</Button>
+                    <p className="text-zinc-400 font-semibold animate-pulse">Waiting for customer to confirm start...</p>
+                    <Button onClick={() => handleNavigate(job.address)} className="w-full bg-zinc-800 hover:bg-zinc-700">Navigate to Address</Button>
                 </div>
             );
         }
         if (job.status === 'Work Started') {
             return (
                 <div className="space-y-4">
-                     <Button onClick={() => handleNavigate(job.address)} className="w-full bg-purple-600 hover:bg-purple-700">Navigate to Address</Button>
+                     <Button onClick={() => handleNavigate(job.address)} className="w-full bg-zinc-800 hover:bg-zinc-700">Navigate to Address</Button>
                     <Link href={`/dashboard/technician/payment/${job.id}`} passHref>
                         <Button className="w-full">Proceed to Payment</Button>
                     </Link>
                 </div>
             );
         }
-        return <p className="text-sm text-center text-slate-500">No actions available.</p>;
+        return <p className="text-sm text-center text-zinc-500">No actions available.</p>;
     };
 
     if (loading) return <Spinner />;
@@ -216,7 +216,7 @@ export default function TechnicianJobDetailPage() {
                         {job.contactNumber && <DetailRow label="Contact Number" value={`tel:${job.contactNumber}`} icon="📞" isLink={true} />}
                     </div>
                 </CardContent>
-                <CardFooter className="bg-slate-50 p-6">
+                <CardFooter className="bg-zinc-950 p-6">
                     <div className="w-full space-y-3">
                         {actionLoading ? <Spinner/> : renderActionButton()}
                     </div>

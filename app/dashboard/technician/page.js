@@ -16,19 +16,19 @@ const WAREHOUSE_LOCATION = "patiala, Punjab, India";
 const JobItem = ({ job, disabled }) => {
     // This component remains the same as your version
     const appointmentDate = job.appointmentDate?.toDate ? job.appointmentDate.toDate() : new Date(job.appointmentDate);
-    const itemClasses = `bg-white rounded-lg shadow-md p-6 mb-4 transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : 'transform hover:scale-105'}`;
+    const itemClasses = `bg-zinc-900 rounded-lg shadow-md p-6 mb-4 transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : 'transform hover:scale-105'}`;
     const detailUrl = `/dashboard/technician/job/${job.id}`;
     const isProductOrder = job.type === 'product';
     const content = (
         <div className={itemClasses}>
             {isProductOrder && (
-                <div className="text-xs font-bold uppercase text-white bg-green-500 inline-block px-2 py-1 rounded-full mb-2">Product Delivery</div>
+                <div className="text-xs font-bold uppercase text-white bg-yellow-500 inline-block px-2 py-1 rounded-full mb-2">Product Delivery</div>
             )}
-            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">{job.deviceInfo}</h3>
-            <p className="text-gray-600 truncate">{job.issueDescription}</p>
-            <div className="border-t border-gray-200 mt-4 pt-4">
-                <p className="text-sm text-gray-500 mb-1">📍 {job.address}</p>
-                <p className="text-sm text-gray-500">🕒 {appointmentDate.toLocaleString()}</p>
+            <h3 className="text-xl font-bold text-zinc-100 flex items-center gap-2">{job.deviceInfo}</h3>
+            <p className="text-zinc-400 truncate">{job.issueDescription}</p>
+            <div className="border-t border-zinc-800 mt-4 pt-4">
+                <p className="text-sm text-zinc-500 mb-1">📍 {job.address}</p>
+                <p className="text-sm text-zinc-500">🕒 {appointmentDate.toLocaleString()}</p>
             </div>
         </div>
     );
@@ -103,7 +103,7 @@ export default function TechnicianDashboard() {
 
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Technician Dashboard</h2>
+            <h2 className="text-3xl font-bold text-zinc-100 mb-6">Technician Dashboard</h2>
             
             {/* Notification Status UI */}
             {notificationStatus !== 'enabled' && (
@@ -115,13 +115,13 @@ export default function TechnicianDashboard() {
             
             {activeJob && (
                 <div className="mb-8">
-                    <h3 className="text-2xl font-bold text-gray-800 mb-4">My Active Job</h3>
+                    <h3 className="text-2xl font-bold text-zinc-100 mb-4">My Active Job</h3>
                     <JobItem job={activeJob} />
                 </div>
             )}
 
             <div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">New Assigned Jobs</h3>
+                <h3 className="text-2xl font-bold text-zinc-100 mb-4">New Assigned Jobs</h3>
                 {assignedJobs.length > 0 ? (
                     <div>
                         {assignedJobs.map(job => (
@@ -129,8 +129,8 @@ export default function TechnicianDashboard() {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-10 bg-white rounded-lg shadow-md">
-                        <p className="text-gray-500">You have no new jobs assigned.</p>
+                    <div className="text-center py-10 bg-zinc-900 rounded-lg shadow-md">
+                        <p className="text-zinc-500">You have no new jobs assigned.</p>
                     </div>
                 )}
             </div>

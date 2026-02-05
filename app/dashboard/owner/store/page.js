@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import Image from "next/image";
 import { db } from "../../../../firebase/config";
 import {
     collection,
@@ -37,25 +38,28 @@ import { Trash2, Search } from "lucide-react";
 /* ---------------------- PRODUCT CARD (Dark) ---------------------- */
 const ProductItem = ({ product, onDelete }) => {
     return (
-        <div className="bg-slate-900/70 border border-slate-800 rounded-lg shadow-md p-4 flex flex-col md:flex-row items-center gap-4 hover:bg-slate-800 transition">
-            <img
+        <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg shadow-md p-4 flex flex-col md:flex-row items-center gap-4 hover:bg-zinc-800 transition">
+            <Image
                 src={product.imageUrl}
                 alt={product.name}
-                className="w-24 h-24 object-cover rounded-md border border-slate-700"
+                width={96}
+                height={96}
+                className="w-24 h-24 object-cover rounded-md border border-zinc-700"
+                unoptimized
             />
 
             <div className="flex-1 text-center md:text-left">
                 <h3 className="text-white text-lg font-semibold">{product.name}</h3>
 
-                <span className="text-xs px-2 py-1 bg-slate-800 border border-slate-700 text-slate-400 rounded inline-block my-1">
+                <span className="text-xs px-2 py-1 bg-slate-800 border border-zinc-700 text-zinc-400 rounded inline-block my-1">
                     {product.category}
                 </span>
 
-                <p className="text-slate-400 text-sm">For {product.model}</p>
+                <p className="text-zinc-400 text-sm">For {product.model}</p>
                 <p className="text-green-400 font-semibold mt-1">₹{product.price}</p>
 
                 <p
-                    className={`text-sm font-bold ${product.isAvailable ? "text-blue-400" : "text-red-400"
+                    className={`text-sm font-bold ${product.isAvailable ? "text-yellow-500" : "text-red-400"
                         }`}
                 >
                     {product.isAvailable ? "Available" : "Out of Stock"}
@@ -214,7 +218,7 @@ export default function StoreManagementPage() {
         );
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-200 px-4 py-8">
+        <div className="min-h-screen bg-black text-zinc-200 px-4 py-8">
 
             <h2 className="text-3xl font-bold text-white mb-6">
                 Manage Store Inventory
@@ -224,10 +228,10 @@ export default function StoreManagementPage() {
 
                 {/* ---------------- LEFT: FORM ---------------- */}
                 <div>
-                    <Card className="bg-slate-900/70 border border-slate-800 text-slate-200">
+                    <Card className="bg-zinc-900/70 border border-zinc-800 text-zinc-200">
                         <CardHeader>
                             <CardTitle className="text-white">Add New Product</CardTitle>
-                            <CardDescription className="text-slate-400">
+                            <CardDescription className="text-zinc-400">
                                 Upload and manage store items.
                             </CardDescription>
                         </CardHeader>
@@ -238,7 +242,7 @@ export default function StoreManagementPage() {
                                 <div className="space-y-2">
                                     <Label>Product Name</Label>
                                     <Input
-                                        className="bg-slate-900 border-slate-700 text-white"
+                                        className="bg-zinc-900 border-zinc-700 text-white"
                                         value={productName}
                                         onChange={(e) => setProductName(e.target.value)}
                                     />
@@ -250,10 +254,10 @@ export default function StoreManagementPage() {
                                         value={productCategory}
                                         onValueChange={setProductCategory}
                                     >
-                                        <SelectTrigger className="bg-slate-900 border-slate-700 text-white">
+                                        <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white">
                                             <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-slate-900 border-slate-700 text-white">
+                                        <SelectContent className="bg-zinc-900 border-zinc-700 text-white">
                                             {formCategories.map((cat) => (
                                                 <SelectItem key={cat} value={cat} className="text-white">
                                                     {cat}
@@ -266,7 +270,7 @@ export default function StoreManagementPage() {
                                 <div className="space-y-2">
                                     <Label>For Model</Label>
                                     <Input
-                                        className="bg-slate-900 border-slate-700 text-white"
+                                        className="bg-zinc-900 border-zinc-700 text-white"
                                         value={productModel}
                                         onChange={(e) => setProductModel(e.target.value)}
                                     />
@@ -276,7 +280,7 @@ export default function StoreManagementPage() {
                                     <Label>Price (₹)</Label>
                                     <Input
                                         type="number"
-                                        className="bg-slate-900 border-slate-700 text-white"
+                                        className="bg-zinc-900 border-zinc-700 text-white"
                                         value={productPrice}
                                         onChange={(e) => setProductPrice(e.target.value)}
                                     />
@@ -288,7 +292,7 @@ export default function StoreManagementPage() {
                                         id="productImage"
                                         type="file"
                                         accept="image/*"
-                                        className="bg-slate-900 border-slate-700 text-white"
+                                        className="bg-zinc-900 border-zinc-700 text-white"
                                         onChange={handleImageChange}
                                     />
                                 </div>
@@ -302,7 +306,7 @@ export default function StoreManagementPage() {
                                     <Label>Available?</Label>
                                 </div>
 
-                                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                                <Button className="w-full bg-yellow-500 hover:bg-yellow-400 text-white">
                                     {isSubmitting ? <Spinner /> : "Add Product"}
                                 </Button>
                             </form>
@@ -318,12 +322,12 @@ export default function StoreManagementPage() {
                     <div className="space-y-4 mb-6">
                         {/* SEARCH BAR */}
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 h-5 w-5" />
                             <Input
                                 placeholder="Search products..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 bg-slate-900 border-slate-700 text-white"
+                                className="w-full pl-10 bg-zinc-900 border-zinc-700 text-white"
                             />
                         </div>
 
@@ -335,8 +339,8 @@ export default function StoreManagementPage() {
                                     onClick={() => setSelectedCategory(cat)}
                                     className={
                                         selectedCategory === cat
-                                            ? "bg-blue-600 text-white"
-                                            : "bg-slate-900 border border-slate-700 text-slate-300 hover:bg-slate-800"
+                                            ? "bg-yellow-500 text-white"
+                                            : "bg-zinc-900 border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
                                     }
                                 >
                                     {cat}
@@ -356,7 +360,7 @@ export default function StoreManagementPage() {
                                 />
                             ))
                         ) : (
-                            <p className="text-slate-400 text-center py-10">
+                            <p className="text-zinc-400 text-center py-10">
                                 No products match your search.
                             </p>
                         )}

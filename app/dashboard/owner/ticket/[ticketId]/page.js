@@ -243,7 +243,7 @@ export default function OwnerTicketDetailPage() {
                                         ))}
                                     </div>
                                     <p className="text-zinc-400 italic">
-                                        "{ticket.review || "No written review provided."}"
+                                        &ldquo;{ticket.review || "No written review provided."}&rdquo;
                                     </p>
                                 </div>
                             ) : (

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import Image from "next/image";
 import { db } from "../../../../firebase/config";
 import {
     collection,
@@ -38,10 +39,13 @@ import { Trash2, Search } from "lucide-react";
 const ProductItem = ({ product, onDelete }) => {
     return (
         <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg shadow-md p-4 flex flex-col md:flex-row items-center gap-4 hover:bg-zinc-800 transition">
-            <img
+            <Image
                 src={product.imageUrl}
                 alt={product.name}
+                width={96}
+                height={96}
                 className="w-24 h-24 object-cover rounded-md border border-zinc-700"
+                unoptimized
             />
 
             <div className="flex-1 text-center md:text-left">

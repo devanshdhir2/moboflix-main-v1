@@ -131,7 +131,7 @@ export default function ManageInventoryPage() {
                 inventory.map(part => <PartItem key={part.id} part={part} onEdit={() => openModal(part)} />)
             ) : (
                 <div className="text-center py-20 bg-zinc-900 rounded-lg shadow-md">
-                    <p className="text-zinc-500">No parts in inventory. Tap the '+' button to add one.</p>
+                    <p className="text-zinc-500">No parts in inventory. Tap the plus button to add one.</p>
                 </div>
             )}
 

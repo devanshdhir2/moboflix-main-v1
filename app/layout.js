@@ -1,12 +1,10 @@
 // app/layout.js
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "../context/AuthContext";
 
-const inter = Inter({ subsets: ["latin"] });
-
 // --- SEO & METADATA CONFIGURATION ---
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   // 1. Title Template: "Page Name | Moboflix"
   title: {
     default: "Moboflix | Premium At-Home Mobile Repair",
@@ -69,7 +67,7 @@ export default function RootLayout({ children }) {
   };
 
   return (
-    <html lang="en" className={`${inter.className} dark`}>
+    <html lang="en" className="dark">
       <head>
         {/* Inject JSON-LD for Google */}
         <script

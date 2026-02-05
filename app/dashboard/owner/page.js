@@ -24,15 +24,15 @@ const getStatusStyle = (status) => {
         case "Pending":
             return "bg-yellow-600/30 text-yellow-300 border border-yellow-700";
         case "In Progress":
-            return "bg-blue-600/30 text-blue-300 border border-blue-700";
+            return "bg-yellow-500/30 text-yellow-300 border border-yellow-700";
         case "Work Started":
             return "bg-indigo-600/30 text-indigo-300 border border-indigo-700";
         case "Pending Payment":
             return "bg-red-600/30 text-red-300 border border-red-700";
         case "Completed":
-            return "bg-green-600/30 text-green-300 border border-green-700";
+            return "bg-yellow-500/30 text-green-300 border border-green-700";
         default:
-            return "bg-slate-700/40 text-slate-300 border border-slate-600";
+            return "bg-slate-700/40 text-zinc-300 border border-slate-600";
     }
 };
 
@@ -47,7 +47,7 @@ const TicketItem = ({ ticket, onDelete }) => {
     };
 
     return (
-        <div className="bg-slate-900/70 border border-slate-800 rounded-lg shadow-md mb-4 transition hover:shadow-lg hover:bg-slate-800 relative group">
+        <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg shadow-md mb-4 transition hover:shadow-lg hover:bg-zinc-800 relative group">
             <Link href={detailUrl} className="block p-6">
                 <div className="flex justify-between items-start mb-3">
                     <h3 className="text-lg font-bold text-white w-2/3">
@@ -63,21 +63,21 @@ const TicketItem = ({ ticket, onDelete }) => {
                     </span>
                 </div>
 
-                <div className="text-sm text-slate-400 space-y-1">
+                <div className="text-sm text-zinc-400 space-y-1">
                     <p>
-                        <span className="font-semibold text-slate-300">Customer:</span>{" "}
+                        <span className="font-semibold text-zinc-300">Customer:</span>{" "}
                         {ticket.customerEmail}
                     </p>
                     <p>
-                        <span className="font-semibold text-slate-300">Technician:</span>{" "}
+                        <span className="font-semibold text-zinc-300">Technician:</span>{" "}
                         {ticket.technicianName}
                     </p>
                 </div>
 
                 {ticket.rating && (
-                    <div className="flex items-center mt-4 pt-4 border-t border-slate-700">
+                    <div className="flex items-center mt-4 pt-4 border-t border-zinc-700">
                         <span className="text-yellow-400">⭐</span>
-                        <span className="ml-2 font-semibold text-slate-300">
+                        <span className="ml-2 font-semibold text-zinc-300">
                             {ticket.rating} / 5
                         </span>
                     </div>
@@ -105,18 +105,18 @@ const TechnicianStatItem = ({ techStat }) => {
             : "N/A";
 
     return (
-        <div className="flex items-center bg-slate-900/70 border border-slate-800 rounded-lg shadow p-4 mb-3">
-            <div className="text-blue-400 text-3xl">👤</div>
+        <div className="flex items-center bg-zinc-900/70 border border-zinc-800 rounded-lg shadow p-4 mb-3">
+            <div className="text-yellow-500 text-3xl">👤</div>
 
             <div className="flex-1 ml-4">
                 <p className="text-md font-bold text-white">{techStat.name}</p>
-                <p className="text-sm text-slate-400">
+                <p className="text-sm text-zinc-400">
                     Jobs Completed: {techStat.totalJobs}
                 </p>
             </div>
 
             <div className="flex items-center">
-                <p className="text-lg font-bold text-slate-200 mr-1">{avgRating}</p>
+                <p className="text-lg font-bold text-zinc-200 mr-1">{avgRating}</p>
                 <span className="text-yellow-400">⭐</span>
             </div>
         </div>
@@ -220,14 +220,14 @@ export default function OwnerDashboard() {
         );
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-200 px-4 sm:px-6 lg:px-8 py-8">
+        <div className="min-h-screen bg-black text-zinc-200 px-4 sm:px-6 lg:px-8 py-8">
             {/* HEADER */}
             <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
                 <h2 className="text-3xl font-bold text-white">Owner Dashboard</h2>
 
                 <Link href="/dashboard/owner/store">
-                    <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white">
-                        <ShoppingCart className="h-5 w-5 text-slate-200" />
+                    <Button className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-white">
+                        <ShoppingCart className="h-5 w-5 text-zinc-200" />
                         Manage Store
                     </Button>
                 </Link>
@@ -242,13 +242,13 @@ export default function OwnerDashboard() {
                         Technician Performance
                     </h3>
 
-                    <div className="bg-slate-900/70 border border-slate-800 rounded-lg p-4 shadow-lg">
+                    <div className="bg-zinc-900/70 border border-zinc-800 rounded-lg p-4 shadow-lg">
                         {technicianStats.length > 0 ? (
                             technicianStats.map((stat) => (
                                 <TechnicianStatItem key={stat.id} techStat={stat} />
                             ))
                         ) : (
-                            <p className="text-slate-400 text-center py-4">
+                            <p className="text-zinc-400 text-center py-4">
                                 No technician data available.
                             </p>
                         )}
@@ -270,8 +270,8 @@ export default function OwnerDashboard() {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-20 bg-slate-900/70 border border-slate-800 rounded-lg shadow-lg">
-                            <p className="text-slate-400">No tickets found.</p>
+                        <div className="text-center py-20 bg-zinc-900/70 border border-zinc-800 rounded-lg shadow-lg">
+                            <p className="text-zinc-400">No tickets found.</p>
                         </div>
                     )}
                 </div>

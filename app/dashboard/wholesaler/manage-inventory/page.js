@@ -7,14 +7,14 @@ import Spinner from '../../../../components/Spinner';
 
 // A single item in the inventory list
 const PartItem = ({ part, onEdit }) => (
-    <div className="flex items-center bg-white rounded-lg shadow p-4 mb-3 transition-shadow hover:shadow-md">
-        <div className="text-3xl text-gray-400">📦</div>
+    <div className="flex items-center bg-zinc-900 rounded-lg shadow p-4 mb-3 transition-shadow hover:shadow-md">
+        <div className="text-3xl text-zinc-500">📦</div>
         <div className="flex-1 ml-4">
-            <p className="text-lg font-bold text-gray-800">{part.name}</p>
-            <p className="text-sm text-gray-500">In Stock: {part.stock}</p>
+            <p className="text-lg font-bold text-zinc-100">{part.name}</p>
+            <p className="text-sm text-zinc-500">In Stock: {part.stock}</p>
         </div>
-        <button onClick={onEdit} className="p-2 rounded-full hover:bg-gray-100">
-            <span className="text-gray-500 text-xl">✏️</span>
+        <button onClick={onEdit} className="p-2 rounded-full hover:bg-zinc-800">
+            <span className="text-zinc-500 text-xl">✏️</span>
         </button>
     </div>
 );
@@ -33,22 +33,22 @@ const PartModal = ({ isOpen, onClose, onSave, onDelete, part, loading }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="bg-zinc-900 rounded-lg shadow-xl w-full max-w-md">
                 <h3 className="text-xl font-bold p-6 border-b">{part ? 'Edit Part' : 'Add New Part'}</h3>
                 <div className="p-6 space-y-4">
-                    <input type="text" placeholder="Part Name" value={partName} onChange={(e) => setPartName(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg" />
-                    <input type="number" placeholder="Stock Quantity" value={partStock} onChange={(e) => setPartStock(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg" />
+                    <input type="text" placeholder="Part Name" value={partName} onChange={(e) => setPartName(e.target.value)} className="w-full p-3 border border-zinc-700 rounded-lg" />
+                    <input type="number" placeholder="Stock Quantity" value={partStock} onChange={(e) => setPartStock(e.target.value)} className="w-full p-3 border border-zinc-700 rounded-lg" />
                 </div>
-                <div className="p-6 bg-gray-50 rounded-b-lg space-y-3">
-                    <button onClick={() => onSave(partName, partStock)} disabled={loading} className="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-400">
+                <div className="p-6 bg-zinc-950 rounded-b-lg space-y-3">
+                    <button onClick={() => onSave(partName, partStock)} disabled={loading} className="w-full bg-yellow-500 text-white font-bold py-3 rounded-lg hover:bg-yellow-400 disabled:bg-zinc-700">
                         {loading ? 'Saving...' : 'Save'}
                     </button>
                     {part && (
-                        <button onClick={onDelete} disabled={loading} className="w-full bg-red-600 text-white font-bold py-3 rounded-lg hover:bg-red-700 disabled:bg-gray-400">
+                        <button onClick={onDelete} disabled={loading} className="w-full bg-red-600 text-white font-bold py-3 rounded-lg hover:bg-red-700 disabled:bg-zinc-700">
                             Delete Part
                         </button>
                     )}
-                     <button onClick={onClose} className="w-full text-center text-gray-600 font-semibold py-2">Cancel</button>
+                     <button onClick={onClose} className="w-full text-center text-zinc-400 font-semibold py-2">Cancel</button>
                 </div>
             </div>
         </div>
@@ -125,17 +125,17 @@ export default function ManageInventoryPage() {
 
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 relative min-h-[calc(100vh-4rem)]">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Manage Inventory</h2>
+            <h2 className="text-3xl font-bold text-zinc-100 mb-6">Manage Inventory</h2>
 
             {inventory.length > 0 ? (
                 inventory.map(part => <PartItem key={part.id} part={part} onEdit={() => openModal(part)} />)
             ) : (
-                <div className="text-center py-20 bg-white rounded-lg shadow-md">
-                    <p className="text-gray-500">No parts in inventory. Tap the '+' button to add one.</p>
+                <div className="text-center py-20 bg-zinc-900 rounded-lg shadow-md">
+                    <p className="text-zinc-500">No parts in inventory. Tap the '+' button to add one.</p>
                 </div>
             )}
 
-            <button onClick={() => openModal()} className="fixed bottom-8 right-8 bg-blue-600 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700">
+            <button onClick={() => openModal()} className="fixed bottom-8 right-8 bg-yellow-500 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:bg-yellow-400">
                 <span className="text-4xl pb-1">+</span>
             </button>
 

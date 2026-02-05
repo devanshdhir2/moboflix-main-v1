@@ -28,8 +28,8 @@ import { CheckCircle } from "lucide-react";
 /* ------------------ DARK DETAIL ROW ------------------ */
 const DetailRow = ({ label, value }) => (
     <div>
-        <p className="text-sm font-medium text-slate-400">{label}</p>
-        <p className="mt-1 text-lg text-slate-200">{value}</p>
+        <p className="text-sm font-medium text-zinc-400">{label}</p>
+        <p className="mt-1 text-lg text-zinc-200">{value}</p>
     </div>
 );
 
@@ -37,14 +37,14 @@ const DetailRow = ({ label, value }) => (
 const TechnicianSelectItem = ({ item, onSelect }) => (
     <div
         onClick={() => onSelect(item)}
-        className="flex items-center p-4 cursor-pointer border-b border-slate-700 hover:bg-slate-800 transition"
+        className="flex items-center p-4 cursor-pointer border-b border-zinc-700 hover:bg-zinc-800 transition"
     >
         <div className="text-3xl">👤</div>
         <div className="ml-4">
-            <p className="font-semibold text-slate-200">
+            <p className="font-semibold text-zinc-200">
                 {item.displayName || item.email}
             </p>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-zinc-400">
                 {item.specialty || "General Repairs"}
             </p>
         </div>
@@ -143,14 +143,14 @@ export default function OwnerTicketDetailPage() {
 
     if (loading)
         return (
-            <div className="flex justify-center items-center h-screen bg-slate-950">
+            <div className="flex justify-center items-center h-screen bg-black">
                 <Spinner />
             </div>
         );
 
     if (!ticket)
         return (
-            <div className="text-center text-slate-300 p-10 bg-slate-950">
+            <div className="text-center text-zinc-300 p-10 bg-black">
                 Ticket not found
             </div>
         );
@@ -160,13 +160,13 @@ export default function OwnerTicketDetailPage() {
         : new Date(ticket.appointmentDate);
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-200 px-4 sm:px-6 lg:px-8 py-8">
+        <div className="min-h-screen bg-black text-zinc-200 px-4 sm:px-6 lg:px-8 py-8">
 
             {/* ------------------ PAGE TITLE ------------------ */}
             <h2 className="text-3xl font-bold text-white mb-2">
                 {ticket.deviceInfo}
             </h2>
-            <p className="text-lg text-slate-400 mb-6">
+            <p className="text-lg text-zinc-400 mb-6">
                 Admin view for Ticket #{ticket.id.substring(0, 6)}…
             </p>
 
@@ -176,7 +176,7 @@ export default function OwnerTicketDetailPage() {
                 <div className="lg:col-span-2 space-y-6">
 
                     {/* DETAILS CARD */}
-                    <Card className="bg-slate-900/70 border border-slate-800">
+                    <Card className="bg-zinc-900/70 border border-zinc-800">
                         <CardHeader>
                             <CardTitle className="text-white">Ticket Details</CardTitle>
                         </CardHeader>
@@ -212,7 +212,7 @@ export default function OwnerTicketDetailPage() {
 
                     {/* GUEST BADGE */}
                     {ticket.isGuestTicket && (
-                        <div className="bg-blue-900/40 border border-blue-700 text-blue-300 p-4 rounded-md">
+                        <div className="bg-yellow-900/30 border border-yellow-700 text-yellow-300 p-4 rounded-md">
                             <p className="font-bold">Guest Ticket</p>
                             <p className="text-sm">
                                 This request was created without signing in.
@@ -221,7 +221,7 @@ export default function OwnerTicketDetailPage() {
                     )}
 
                     {/* REVIEW CARD */}
-                    <Card className="bg-slate-900/70 border border-slate-800">
+                    <Card className="bg-zinc-900/70 border border-zinc-800">
                         <CardHeader>
                             <CardTitle className="text-white">Customer Review</CardTitle>
                         </CardHeader>
@@ -235,19 +235,19 @@ export default function OwnerTicketDetailPage() {
                                                 key={i}
                                                 className={`text-2xl ${i < ticket.rating
                                                     ? "text-yellow-400"
-                                                    : "text-slate-600"
+                                                    : "text-zinc-400"
                                                     }`}
                                             >
                                                 ★
                                             </span>
                                         ))}
                                     </div>
-                                    <p className="text-slate-400 italic">
+                                    <p className="text-zinc-400 italic">
                                         "{ticket.review || "No written review provided."}"
                                     </p>
                                 </div>
                             ) : (
-                                <p className="text-slate-500">
+                                <p className="text-zinc-500">
                                     No review has been left yet.
                                 </p>
                             )}
@@ -257,7 +257,7 @@ export default function OwnerTicketDetailPage() {
 
                 {/* ------------------ RIGHT SECTION (ADMIN ACTIONS) ------------------ */}
                 <div>
-                    <Card className="bg-slate-900/70 border border-slate-800">
+                    <Card className="bg-zinc-900/70 border border-zinc-800">
                         <CardHeader>
                             <CardTitle className="text-white">Admin Actions</CardTitle>
                         </CardHeader>
@@ -294,7 +294,7 @@ export default function OwnerTicketDetailPage() {
                                     {ticket.status === "Pending Payment" && (
                                         <Button
                                             onClick={handleApprovePayment}
-                                            className="w-full bg-green-600 hover:bg-green-700 text-white"
+                                            className="w-full bg-yellow-500 hover:bg-yellow-400 text-white"
                                         >
                                             Approve Payment (₹{ticket.finalAmount})
                                         </Button>
@@ -304,14 +304,14 @@ export default function OwnerTicketDetailPage() {
                                     {ticket.status !== "Completed" && (
                                         <Button
                                             onClick={() => setModalVisible(true)}
-                                            className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200"
+                                            className="w-full bg-slate-800 hover:bg-slate-700 text-zinc-200"
                                         >
                                             Reassign Technician
                                         </Button>
                                     )}
 
                                     {ticket.status === "Completed" && (
-                                        <p className="text-center text-slate-500">
+                                        <p className="text-center text-zinc-500">
                                             No actions available.
                                         </p>
                                     )}
@@ -325,9 +325,9 @@ export default function OwnerTicketDetailPage() {
             {/* ------------------ DARK GLASS MODAL ------------------ */}
             {isModalVisible && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-xl flex items-center justify-center z-40">
-                    <div className="bg-slate-900/80 border border-slate-700 rounded-xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden backdrop-blur-xl">
+                    <div className="bg-zinc-900/80 border border-zinc-700 rounded-xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-hidden backdrop-blur-xl">
 
-                        <h3 className="text-xl font-bold text-white p-6 border-b border-slate-700">
+                        <h3 className="text-xl font-bold text-white p-6 border-b border-zinc-700">
                             Select a Technician
                         </h3>
 
@@ -344,7 +344,7 @@ export default function OwnerTicketDetailPage() {
                         <Button
                             variant="ghost"
                             onClick={() => setModalVisible(false)}
-                            className="w-full p-4 border-t border-slate-700 text-slate-300 hover:bg-slate-800"
+                            className="w-full p-4 border-t border-zinc-700 text-zinc-300 hover:bg-zinc-800"
                         >
                             Cancel
                         </Button>

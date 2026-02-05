@@ -9,9 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const InventoryItem = ({ item }) => {
     const inStock = item.stock > 0;
     return (
-        <div className="flex items-center justify-between bg-white p-4 mb-3 rounded-lg border">
+        <div className="flex items-center justify-between bg-zinc-900 p-4 mb-3 rounded-lg border">
             <div>
-                <p className="font-semibold text-slate-800">{item.name}</p>
+                <p className="font-semibold text-zinc-200">{item.name}</p>
             </div>
             <div className={`px-3 py-1 text-sm font-semibold rounded-full ${inStock ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                 {inStock ? `${item.stock} in stock` : 'Out of Stock'}
@@ -55,7 +55,7 @@ export default function ViewInventoryPage() {
                         </div>
                     ) : (
                         <div className="text-center py-10">
-                            <p className="text-slate-500">The warehouse inventory is currently empty.</p>
+                            <p className="text-zinc-500">The warehouse inventory is currently empty.</p>
                         </div>
                     )}
                 </CardContent>

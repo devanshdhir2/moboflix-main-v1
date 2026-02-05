@@ -91,12 +91,12 @@ export default function PaymentPage({ params }) {
                     <CardDescription>Enter the final amount to generate a payment QR code for the customer.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center">
-                    <div className="my-6 p-4 bg-white rounded-lg shadow-inner inline-block">
+                    <div className="my-6 p-4 bg-zinc-900 rounded-lg shadow-inner inline-block">
                         {qrValue ? (
                             <QRCodeCanvas value={qrValue} size={220} />
                         ) : (
-                            <div className="w-56 h-56 bg-slate-100 flex items-center justify-center rounded-lg">
-                                <p className="text-slate-400 text-sm">QR Code will appear here</p>
+                            <div className="w-56 h-56 bg-zinc-900 flex items-center justify-center rounded-lg">
+                                <p className="text-zinc-400 text-sm">QR Code will appear here</p>
                             </div>
                         )}
                     </div>
@@ -110,15 +110,15 @@ export default function PaymentPage({ params }) {
 
                     {submitted && !isPaymentApproved && (
                         <div className="w-full text-center p-6 bg-blue-50 rounded-lg animate-pulse">
-                            <p className="text-blue-600 font-semibold">Waiting for owner approval...</p>
+                            <p className="text-yellow-500 font-semibold">Waiting for owner approval...</p>
                         </div>
                     )}
                 </CardContent>
 
                 {!submitted && !isPaymentApproved && (
-                    <CardFooter className="flex-col space-y-4 bg-slate-50 p-6">
-                        <div className="w-full flex items-center bg-white rounded-lg border">
-                            <span className="text-xl font-bold text-slate-600 px-4">₹</span>
+                    <CardFooter className="flex-col space-y-4 bg-zinc-950 p-6">
+                        <div className="w-full flex items-center bg-zinc-900 rounded-lg border">
+                            <span className="text-xl font-bold text-zinc-400 px-4">₹</span>
                             <Input
                                 type="number"
                                 placeholder="Final Amount"
@@ -128,15 +128,15 @@ export default function PaymentPage({ params }) {
                             />
                             <Button onClick={generateQR} className="mr-2">Generate</Button>
                         </div>
-                        <Button onClick={handleSubmitForApproval} disabled={!qrValue || actionLoading} className="w-full bg-green-600 hover:bg-green-700">
+                        <Button onClick={handleSubmitForApproval} disabled={!qrValue || actionLoading} className="w-full bg-yellow-500 hover:bg-yellow-400">
                             {actionLoading ? 'Submitting...' : 'Submit for Approval'}
                         </Button>
                     </CardFooter>
                 )}
 
                 {isPaymentApproved && (
-                    <CardFooter className="bg-slate-50 p-6">
-                        <Button onClick={() => router.push('/dashboard/technician')} className="w-full bg-slate-800 hover:bg-slate-900">
+                    <CardFooter className="bg-zinc-950 p-6">
+                        <Button onClick={() => router.push('/dashboard/technician')} className="w-full bg-slate-800 hover:bg-zinc-900">
                             Close Ticket
                         </Button>
                     </CardFooter>
